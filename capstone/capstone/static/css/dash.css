@@ -312,6 +312,36 @@ body, html {
     background-color: #FF7373;
     border-radius: 15px;
 }
+.dEntry_button_fx {
+    position: relative;
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    text-decoration: none;
+    overflow: hidden;
+    cursor: pointer;
+  }
+.dEntry_button_fx:after {
+    content: "";
+    background: #fcfcfc;
+    display: block;
+    position: absolute;
+    padding-top: 300%;
+    padding-left: 350%;
+    margin-left: -20px!important;
+    margin-top: -120%;
+    opacity: 0;
+    transition: all 0.8s
+  }
+  
+  .dEntry_button_fx:active:after {
+    padding: 0;
+    margin: 0;
+    opacity: 1;
+    transition: 0s
+  }
   
 #overlay1 {
     display: none;

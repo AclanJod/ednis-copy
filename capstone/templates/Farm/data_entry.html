@@ -2,10 +2,10 @@
 {% load static %}
 {% block content %}
 <div> DATA ENTRY</div>
-<div class="row px-3 py-3 gap-3 ps-5">
+<div class="row px-3 py-3 gap-1 ps-5">
     <div class="col-5">
-        <button class="ctm-btn-2 dEntry_button" id="openOverlayButton1">
-            <img src="{% static 'img/pig_logo.png' %}" style="height: 120px;" alt="...">
+        <button class="ctm-btn-2 dEntry_button dEntry_button_fx" id="openOverlayButton1">
+            <img src="{% static 'img/pig_logo.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
                 PIG SALES
             </span>
@@ -13,7 +13,7 @@
     </div>
     <div class="col-5">
         <button class="ctm-btn-2 dEntry_button" id="openOverlayButton2">
-            <img src="{% static 'img/pig_logo.png' %}" style="height: 120px;" alt="...">
+            <img src="{% static 'img/pig_logo.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
                 Sow Performance
             </span>
@@ -21,18 +21,18 @@
     </div>
 </div>
 
-<div class="row px-3 py-3 gap-3 ps-5">
+<div class="row px-3 py-3 gap-1 ps-5">
     <div class="col-5">
-        <button class="ctm-btn-2 dEntry_button" id="openOverlayButton3">
-            <img src="{% static 'img/piglets.png' %}" style="height: 120px;" alt="...">
+        <button class="ctm-btn-2 dEntry_button dEntry_button_fx" id="openOverlayButton3">
+            <img src="{% static 'img/piglets.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
                 Weanlings
             </span>
         </button>
     </div>
     <div class="col-5">
-        <button class="ctm-btn-2 dEntry_button" id="openOverlayButton4">
-            <img src="{% static 'img/vaccine_icon.png' %}" style="height: 120px;" alt="...">
+        <button class="ctm-btn-2 dEntry_button dEntry_button_fx" id="openOverlayButton4">
+            <img src="{% static 'img/vaccine_icon.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
                 Vaccine
             </span>
@@ -40,18 +40,18 @@
     </div>
 </div>
 
-<div class="row px-3 py-3 gap-3 ps-5">
+<div class="row px-3 py-3 gap-1 ps-5">
     <div class="col-5">
-        <button class="ctm-btn-2 dEntry_button" id="openOverlayButton5">
-            <img src="{% static 'img/feeds_logo.png' %}" style="height: 120px;" alt="...">
+        <button class="ctm-btn-2 dEntry_button dEntry_button_fx" id="openOverlayButton5">
+            <img src="{% static 'img/feeds_logo.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
                 Feeds Inventory
             </span>
         </button>
     </div>
     <div class="col-5">
-        <button class="ctm-btn-2 dEntry_button" id="openOverlayButton6">
-            <img src="{% static 'img/mortality_icon.png' %}" style="height: 120px;" alt="...">
+        <button class="ctm-btn-2 dEntry_button dEntry_button_fx" id="openOverlayButton6">
+            <img src="{% static 'img/mortality_icon.png' %}" style="height: 150px;" alt="...">
             <span class="pb-3 text-white fs-5 fw-bold">
                 Mortality Form
             </span>
@@ -125,12 +125,18 @@
                 </span>
             </div>
         <div class="scheduling-container">
-            <form>
+            <form method="POST" action="{% url 'add_sp' user_type=user_type %}">
+                {% csrf_token %}
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="SowNo">Sow no.:</label>
-                            <input type="text" class="form-control" id="SowNo" name="SowNo">
+                            <select class="form-select" id="SowNo" name="SowNo">
+                                <option value="" selected>Select a Sow</option>
+                                {% for sow in sows %}
+                                <option value="{{ sow.id }}">{{ sow.pig_id }}</option>
+                                {% endfor %}
+                                </select>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -144,7 +150,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="DOB">DOB:</label>
-                            <input type="text" class="form-control" id="DOB" name="DOB">
+                            <input type="text" class="form-control" id="dob" name="dob">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -158,7 +164,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="class">Class:</label>
-                            <input type="text" class="form-control" id="class" name="class">
+                            <input type="text" class="form-control" id="pig_class" name="pig_class">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -262,7 +268,7 @@
                 <input class="shadow  custom_button" type="submit" value="Save" style="border-radius: 20px; width: 120px; background-color: #ff7b7b; color: #FFFFFF;">
                 <input class="shadow custom_button" type="button" id="closeOverlayButton2" value="Cancel" style="border-radius: 20px; width: 120px;">
             </div>
-        
+            
             </form>
         </div>
         </div>   
@@ -447,7 +453,7 @@
                 {% csrf_token %}
                 <div class="flex1">
                     <label for="mortalitypigID" class="LPigID">Pig ID:</label>
-                    <select class="form-select" id="mortalitypigID" name="pig_id">
+                    <select class="form-select mb-2" id="mortalitypigID" name="pig_id">
                         <option value="" selected>Select a Pig</option>
                         {% for pig in pigs %}
                             {% if pig.id not in pig_sales_ids %}

@@ -2,11 +2,11 @@
 {% load static %}
 {% block content %}
 <div>Manage Schedules</div>
-<div class="navbar mb-2">
+<div class="navbar mb-2 rounded">
     <button class="custom_button" id="openOverlayButton" style="border-radius: 20px; width: 120px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;" >Set Schedule</button>
     <div class="search-container">
-        <input type="text" placeholder="Search...">
-        <button type="submit">Search</button>
+        <button class="z-3 rounded" type="submit" style="transform: translate(767%, -3%);"><img src="{% static 'img/loupe.png'%}"></button>
+        <input class="z-0 rounded" style="width: 320px;" type="text" placeholder="Search...">
     </div>
 </div>
 <div id="overlay">
@@ -48,7 +48,7 @@
     <div class="mt-2 schedule_header">SCHEDULE TODAY:</div>
     {% if today_tasks %}
         {% for task in today_tasks %}
-            <div class="mt-2 p-2 custom_sched_tab">
+            <div class="mt-2 p-2 rounded custom_sched_tab">
                 {{ task.task_name }}
                 <label class="checkbox-container">
                     <input
@@ -70,21 +70,21 @@
 
 
 <div class="container">
-    <div class="row">
-        <div class=" col-md-6 custom_todo_box"  id="sample">
+    <div class="row gap-3 mt-5">
+        <div class="card border border-dark rounded mt-2 col-md-6 custom_todo_box" style="width: 45%;" id="sample">
             <h4>To Do</h4>
             {% for task in todo_tasks %}
-            <div class="card mb-2 custom_todo">
+            <div class="card mb-0 rounded custom_todo">
                 <div class="card-body" >
                     {{ task.task_name }}
                 </div>
             </div>
             {% endfor %}
         </div>
-        <div class="col-md-6 custom_todo_box" id="doneTasks">
+        <div class="card border border-dark rounded mt-2 col-md-6 custom_todo_box" style="width: 45%;" id="doneTasks">
             <h4>Done</h4>
             {% for task in done_tasks %}
-            <div class="card mb-3 custom_done">
+            <div class="card mb-0 rounded custom_done">
                 <div class="card-body">
                     {{ task.task_name }}
                 </div>
