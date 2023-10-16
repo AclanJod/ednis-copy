@@ -2,6 +2,7 @@ from django.db import models
 from datetime import date 
 
 class User(models.Model):
+    
     firstname = models.CharField(max_length=100, default="Juan") 
     lastname = models.CharField(max_length=100, default="De la Cruz")
     username = models.CharField(max_length=255)
@@ -17,6 +18,7 @@ class User(models.Model):
     date = models.DateField(default=date.today) 
 
 class Task(models.Model):
+
     task_name = models.CharField(max_length=255)
     due_date = models.DateField()
     due_time = models.TimeField()
@@ -24,6 +26,7 @@ class Task(models.Model):
     is_done = models.BooleanField(default=False)
 
 class Pig(models.Model):
+
     pig_id = models.CharField(max_length=255)
     dam = models.CharField(max_length=255)
     dob = models.DateField()
@@ -43,7 +46,8 @@ class Pig(models.Model):
     verif_by = models.CharField(max_length=255)
     date = models.DateField(default=date.today) 
 
-class Sow(models.Model):
+class Sow(models.Model): 
+
     pig_id = models.CharField(max_length=255, null=True)
     dam = models.CharField(max_length=20)
     dob = models.DateField()
@@ -56,8 +60,8 @@ class Sow(models.Model):
     verif_by = models.CharField(max_length=50)
     date = models.DateField()
 
-
 class FeedsInventory(models.Model):
+
     feeds_brand = models.CharField(max_length=255)
     feeds_ration = models.CharField(max_length=255)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
@@ -66,6 +70,7 @@ class FeedsInventory(models.Model):
     date = models.DateField()
 
 class PigSale(models.Model):
+
     pig = models.ForeignKey('Pig', on_delete=models.CASCADE)
     weight = models.DecimalField(max_digits=5, decimal_places=2)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -73,6 +78,7 @@ class PigSale(models.Model):
     date = models.DateField()
 
 class MortalityForm(models.Model):
+
     pig = models.ForeignKey(Pig, on_delete=models.CASCADE, related_name='mortality_forms')
     date = models.DateField()
     pig_class = models.CharField(max_length=255)
@@ -86,6 +92,7 @@ class MortalityForm(models.Model):
         return PigSale.objects.filter(pig=self.pig).exists()
     
 class Vaccine(models.Model):
+
     pig = models.ForeignKey(Pig, on_delete=models.CASCADE, related_name='vaccines')
     date = models.DateField()
     vaccine = models.CharField(max_length=255)
@@ -96,6 +103,7 @@ class Vaccine(models.Model):
         return f"Vaccine for Pig {self.pig.pig_id} - {self.vaccine}"
 
 class Weanling(models.Model):
+
     pig = models.ForeignKey('Pig', on_delete=models.CASCADE, related_name='weanlings_pig')
     sow = models.ForeignKey('Sow', on_delete=models.CASCADE, related_name='weanlings_sow')
     date = models.DateField()
@@ -111,6 +119,7 @@ class Weanling(models.Model):
         return f"Weanling {self.id}"
 
 class SowPerformance(models.Model):
+
     sow_no = models.ForeignKey('Sow', on_delete=models.CASCADE, related_name='sow_perf')
     dam = models.CharField(max_length=20)
     dob = models.CharField(max_length=20)

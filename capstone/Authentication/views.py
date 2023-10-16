@@ -16,6 +16,7 @@ from django.db import transaction
 import json
 from django.db.models import Q
 from datetime import date as today_date, timedelta
+from django.contrib import messages
 
 def add_pigs(request, user_type):
     context = {
@@ -130,6 +131,8 @@ def manage_user(request, user_type):
             )
             user.save()
             
+            messages.success(request, "User Added Successfully!! ")
+
             # Redirect to the same page to prevent form resubmission
             return redirect('manage_user', user_type=user_type)
      # Retrieve a queryset of User objects from your database
@@ -571,7 +574,9 @@ def save_feeds_inventory(request, user_type):
         )
         feeds_inventory.save()
 
-        return redirect('data_entry', user_type=user_type) 
+        # Render the success_overlay.html template
+        messages.success(request, 'Feeds added to Inventory!')
+        return render(request, 'Farm/success_overlay.html', {'user_type': user_type}) 
 
     return render(request, 'Farm/data_entry.html', {"user_type": user_type})
 
@@ -596,7 +601,9 @@ def save_pig_sale(request, user_type):
         )
         pig_sale.save()
 
-        return redirect('data_entry', user_type=user_type)
+        # Render the success_overlay.html template
+        messages.success(request, 'Pig sale added to database')
+        return render(request, 'Farm/success_overlay.html', {'user_type': user_type})
 
     # Pig sales IDs can be accessed from the context
     pig_sales_ids = PigSale.objects.values_list('pig_id', flat=True)
@@ -629,9 +636,11 @@ def mortality_form(request, user_type):
             )
             mortality_form.save()
 
-            return redirect('data_entry', user_type=user_type)
+            # Render the success_overlay.html template
+            messages.success(request, 'Pig added to total deaths')
+            return render(request, 'Farm/success_overlay.html', {'user_type': user_type})
         else:
- 
+            messages.warning("Selected Pig has been sold")
             error_message = "Selected pig has been sold."
 
     context = {
@@ -659,8 +668,9 @@ def save_vaccine(request, user_type):
             pig = Pig.objects.get(id=pig_id)
             vaccine_record = Vaccine(pig=pig, date=date, vaccine=vaccine, purpose=purpose, dosage=dosage)
             vaccine_record.save()
-            # Redirect to a success page or do something else
-            return redirect('data_entry', user_type=user_type)
+            # Render the success_overlay.html template
+            messages.success(request, 'Pig vaccinated successfully!')
+            return render(request, 'Farm/success_overlay.html', {'user_type': user_type})
         except Pig.DoesNotExist:
             error_message = "Pig with the provided ID does not exist."
 
@@ -694,9 +704,12 @@ def save_weanling(request, user_type):
         )
         weanling.save()
 
-        return redirect('data_entry', user_type=user_type) 
+        # Render the success_overlay.html template
+        return render(request, 'Farm/success_overlay.html', {'user_type': user_type})
     
     return render(request, 'Farm/data_entry.html')
+
+from .models import Sow 
 
 def add_sp(request, user_type):
     if request.method == 'POST':
@@ -760,7 +773,9 @@ def add_sp(request, user_type):
         )
         sp.save()
 
-        return redirect('data_entry', user_type = user_type)
+        # Render the success_overlay.html template
+        messages.success(request, 'Sow Performance added to database')
+        return render(request, 'Farm/success_overlay.html', {'user_type': user_type})
     
     # Sow Performance IDs can be accessed from the context
     sow_perf_ids = SowPerformance.objects.values_list('pig_id', flat=True)
