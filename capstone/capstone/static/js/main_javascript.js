@@ -1065,3 +1065,31 @@ document.addEventListener("DOMContentLoaded", function () {
         },
     });
 });
+$(".edit_button").click(function () {
+    // Show the edit overlay
+    $("#edit_overlay").show();
+
+    // Get the user data from the clicked row
+    var row = $(this).closest("tr");
+    var firstname = row.find("td:nth-child(1)").text();
+    var lastname = row.find("td:nth-child(2)").text();
+    var username = row.find("td:nth-child(3)").text();
+    var role = row.find("td:nth-child(4)").text();
+    var date = row.find("td:nth-child(5)").text();
+
+    // Populate the overlay fields with the user data
+    $("#edit_firstname").val(firstname);
+    $("#edit_lastname").val(lastname);
+    $("#edit_username").val(username);
+    $("#edit_role").val(role);
+    $("#edit_date").val(date);
+
+    // Store the user ID in a data attribute
+    var userId = $(this).data("user-id");
+    $(".save-button").data("user-id", userId);
+
+    $("#cancel-button").click(function () {
+        // Hide the edit overlay when the "Cancel" button is clicked
+        $("#edit_overlay").hide();
+    });
+});
