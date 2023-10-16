@@ -110,6 +110,13 @@ $(document).ready(function() {
             overlay.style.display = "none";
         }
     }
+    // Edit_Overlay
+    function closeEdit_overlay() {
+        const overlay = document.getElementById("overlay4");
+        if (overlay) {
+            overlay.style.display = "none";
+        }
+    }
 
     const openOverlayButton4 = document.getElementById("openOverlayButton4");
     if (openOverlayButton4) {
