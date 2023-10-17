@@ -1,7 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="col py-3 custom-padX gap-5" style="height: 17rem;">
+
+<div id="months" style="display: none;">{{ months|safe }}</div>
+<div id="counts" style="display: none;">{{ counts|safe|default:"[]" }}</div>
+<div id="totalPigs" style="display: none;">{{ total_pigs }}</div>
+<div id="vaccinatedPigs" style="display: none;">{{ vaccinated_pigs }}</div>
+<div id="salesData" style="display: none;">{{ sale_counts|safe }}</div>
+<div id="saleMonths" style="display: none;">{{ sale_months|safe }}</div>
+<div id="mortalityData" style="display: none;">{{ mortality_counts|safe }}</div>
+<div id="mortalityDates" style="display: none;">{{ mortality_dates|safe }}</div>
+
+<div class="col py-3 custom-padX" style="height: 17rem;">
   <div class="row py-3 ms-3 gap-5">
       <div class="bg-primary card px-2 rounded" style="width: 25rem; height: 15rem;">
         <div class="col col-auto card-body card-font d-flex justify-content-between">
@@ -37,7 +47,7 @@
         </div>
       </div>
     </div>
-    <div class="ms-3">
+    <div class="row ms-3">
           <div class="card px-2 custom_sched_box" id="scheduleToday">
             <div class="mt-2 schedule_header">SCHEDULE TODAY:</div>
             {% if today_tasks %}
@@ -60,7 +70,7 @@
               <p class="no-tasks-text">No Tasks Today.</p>
               {% endif %}
           </div>
-  </div>
+          <div id="calendar" class=""></div>
+    </div>
 </div>
-
 {% endblock %}

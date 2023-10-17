@@ -15,8 +15,8 @@ from django.contrib.auth import authenticate, login
 from django.db import transaction
 import json
 from django.db.models import Q
-from datetime import date as today_date, timedelta
 from django.contrib import messages
+from datetime import date as today_date, timedelta
 
 def add_pigs(request, user_type):
     context = {
@@ -79,6 +79,7 @@ def add_pigs(request, user_type):
     # Filter the full pig list to exclude those with PigSale or MortalityForm
     pig_list = Pig.objects.all().exclude(exclude_q)
     sow_list = Sow.objects.all()
+    pig_list_all = Pig.objects.all()
 
     context.update({
         'pig_list_28_days': pig_list_28_days,
@@ -87,11 +88,10 @@ def add_pigs(request, user_type):
         'pig_list_greater_than_148_days': pig_list_greater_than_148_days,
         'pig_list': pig_list,
         'sow_list': sow_list,
+        'pig_list_all':pig_list_all,
     })
 
     return render(request, 'Farm/add_pigs.html', context)
-
-
 
 def Login(request):
     return render(request, 'Authentication/Login.html')
@@ -100,14 +100,25 @@ def index(request, user_type):
 
     feed_stock =  FeedsInventory.objects.all()
 
+    # Define the Q object to filter pigs with PigSale or MortalityForm
+    exclude_q = Q(pigsale__isnull=False) | Q(mortality_forms__isnull=False)
+
     eighty_eight_days_ago = date.today() - timedelta(days=88)
-    pig_list_88_days = Pig.objects.filter(dob__gte=eighty_eight_days_ago)
-    pig_list_more_88_days = Pig.objects.filter(dob__lt=eighty_eight_days_ago)
+    pig_list_88_days = Pig.objects.filter(dob__gte=eighty_eight_days_ago).exclude(exclude_q)
+    pig_list_more_88_days = Pig.objects.filter(dob__lt=eighty_eight_days_ago).exclude(exclude_q)
 
     today = date.today()
     today_tasks = Task.objects.filter(due_date=today)
-    checked_tasks = Task.objects.filter(is_done=True)  
-    return render(request, 'Farm/index.html', {"today_tasks": today_tasks, "checked_tasks": checked_tasks, "user_type": user_type, "pig_list_88_days":  pig_list_88_days, "pig_list_more_88_days":pig_list_more_88_days, "feed_stock":feed_stock })
+    checked_tasks = Task.objects.filter(is_done=True)
+
+    return render(request, 'Farm/index.html', {
+        "today_tasks": today_tasks,
+        "checked_tasks": checked_tasks,
+        "user_type": user_type,
+        "pig_list_88_days": pig_list_88_days,
+        "pig_list_more_88_days": pig_list_more_88_days,
+        "feed_stock": feed_stock
+    })
 
 def manage_user(request, user_type):
     if request.method == 'POST':
@@ -209,15 +220,18 @@ def reports(request, user_type):
 def data_entry(request, user_type):
     # Get a list of pig IDs that have a PigSale entry
     pig_sales_ids = PigSale.objects.values_list('pig_id', flat=True)
+    weanling_pig_ids = Weanling.objects.values_list('pig_id', flat=True)
 
     # Use Q objects to filter out pigs that have either PigSale or MortalityForm
     excluded_pigs = Pig.objects.filter(Q(id__in=pig_sales_ids) | Q(mortality_forms__isnull=False))
 
+    excluded_piglets = Pig.objects.filter(Q(id__in=pig_sales_ids) | Q(mortality_forms__isnull=False) | Q(id__in=weanling_pig_ids))
     # Exclude the excluded pigs from the list of all pigs
     sows = Sow.objects.all()
     pigs = Pig.objects.exclude(id__in=excluded_pigs)
+    piglets = Pig.objects.exclude(id__in=excluded_piglets)
 
-    return render(request, 'Farm/data_entry.html', {"user_type": user_type, 'pigs': pigs, 'pig_sales_ids': pig_sales_ids, 'sows':sows})
+    return render(request, 'Farm/data_entry.html', {"user_type": user_type, 'pigs': pigs, 'pig_sales_ids': pig_sales_ids, 'sows':sows, 'piglets': piglets})
 
 
 
@@ -554,7 +568,55 @@ def delete_sow(request, user_type, sow_id):
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
+def get_sow_data(request, pig_id):
+    try:
+        sow = Sow.objects.get(pk=pig_id)
 
+        # Serialize the sow data into a dictionary
+        sow_data = {
+            'sow_id': sow.pig_id,
+            'dam': sow.dam,
+            'dob': sow.dob.strftime('%Y-%m-%d'),  # Format date as string
+            'sire': sow.sire,
+            'pig_class': sow.pig_class,
+            'sex': sow.sex,
+            'count': sow.count,
+            'weight': str(sow.weight),  # Convert DecimalField to string
+            'remarks': sow.remarks,
+            # Add more fields as needed
+        }
+
+        return JsonResponse({'success': True, 'sow_data': sow_data})
+    except Sow.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Sow not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+def update_sow_data(request, sow_id, user_type):
+    try:
+        # Retrieve the sow based on sow_id
+        sow = Sow.objects.get(pk=sow_id)
+
+        if request.method == 'POST':
+            # Update the sow data based on the POST data
+            sow.dam = request.POST.get('dam')
+            sow.dob = request.POST.get('dob')
+            sow.sire = request.POST.get('sire')
+            sow.pig_class = request.POST.get('pig_class')
+            sow.sex = request.POST.get('sex')
+            sow.count = request.POST.get('count')
+            sow.weight = request.POST.get('weight')
+            sow.remarks = request.POST.get('remarks')
+            # Update more fields as needed
+            sow.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    except Sow.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Sow not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+    
 def save_feeds_inventory(request, user_type):
     if request.method == 'POST':
         feeds_brand = request.POST.get('feedsB')
@@ -637,7 +699,7 @@ def mortality_form(request, user_type):
             mortality_form.save()
 
             # Render the success_overlay.html template
-            messages.success(request, 'Pig added to total deaths')
+            messages.success(request, 'Mortality Form Saved')
             return render(request, 'Farm/success_overlay.html', {'user_type': user_type})
         else:
             messages.warning("Selected Pig has been sold")
@@ -782,3 +844,20 @@ def add_sp(request, user_type):
     sows = Sow.objects.get.all(id__in=sow_perf_ids)
 
     return render(request, 'Farm/data_entry.html', {'sows': sows, 'sow_perf_ids': sow_perf_ids})
+
+def search_suggestions(request):
+    search_query = request.GET.get('search_query', '')
+
+    # Search for pig_id in the Pig model, excluding those with PigSale or MortalityForm
+    pig_results = Pig.objects.filter(pig_id__icontains=search_query).exclude(
+        Q(pigsale__isnull=False) | Q(mortality_forms__isnull=False)
+    ).values('pig_id')
+
+    # Search for pig_id in the Sow model
+    sow_results = Sow.objects.filter(pig_id__icontains=search_query).values('pig_id')
+
+    # Combine and extract pig_id values
+    results = list(pig_results) + list(sow_results)
+    suggestions = [result['pig_id'] for result in results]
+
+    return JsonResponse({'suggestions': suggestions})
