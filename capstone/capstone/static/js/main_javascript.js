@@ -129,11 +129,33 @@ $(document).ready(function() {
         }
     }
 
-    function closeOverlay5() {
-        const overlay = document.getElementById("overlay5");
+    console.log("1111", 1111);
+    function openOverlay() {
+        const overlay = document.getElementById("sow_perf_overlay");
+        if (overlay) {
+            overlay.style.display = "block";
+        }
+    }
+
+    function openSowPerfOverlay() {
+        const overlay = document.getElementById("sow_Perf_overlay");
+        if (overlay) {
+            overlay.style.display = "block";
+        }
+    }
+    const openSowPerf = document.getElementById("openSowPerfButton");
+    if (openSowPerf) {
+        openSowPerf.addEventListener("click", openSowPerfOverlay);
+    }   
+    function closeSowPerfOverlay () {
+        const overlay = document.getElementById("sow_Perf_overlay");
         if (overlay) {
             overlay.style.display = "none";
         }
+    }
+    const closeSowPerf = document.getElementById("closeSowPerfButton");
+    if (closeSowPerf){
+        closeSowPerf.addEventListener("click", closeSowPerfOverlay);
     }
 
     const openOverlayButton5 = document.getElementById("openOverlayButton5");
@@ -202,7 +224,6 @@ $(document).ready(function() {
         }
     });
     
-
     // Add click event handler for the edit button
     $(".edit_button").click(function () {
         // Show the edit overlay
@@ -463,7 +484,7 @@ $(document).ready(function() {
         }
     });
     // Add an event listener for the sow data edit button
-$(".edit_sow_button").click(function () {
+    $(".edit_sow_button").click(function () {
     var sowId = $(this).data("sow-id");
     var userType = $(this).data("user-type");
     console.log("User Type:", userType);
@@ -504,6 +525,15 @@ $(".edit_sow_button").click(function () {
     $("#cancel-sow-button").click(function () {
         // Hide the sow data edit overlay when the "Cancel" button is clicked
         $("#edit_sow_overlay").hide();
+    });
+});
+
+    // Add an event listener for the sow performance button
+    $(".sow_perf_button").click(function () {
+        $("#sow_Perf_overlay").show();
+
+    $("#close_sow_perf_overlay").click(function() {
+        $("#sow_Perf_overlay").hide();
     });
 });
 
