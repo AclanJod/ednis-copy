@@ -528,10 +528,32 @@ $(document).ready(function() {
     });
 });
 
+
     // Add an event listener for the sow performance button
     $(".sow_perf_button").click(function () {
-        $("#sow_Perf_overlay").show();
+        var sowPerfID = $(this).data("sow_no");
+        var userType = $(this).data("user-type");
+        console.log("User Type:", userType);
 
+        // Make an AJAX request to fetch the sow data based on the sow ID and user type
+        var getSowPerfUrl = '/get_sow_perf/' + sowPerfID + '/'
+
+        $.ajax({
+            url: getSowPerfUrl,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log("Data received from the server:", data);
+                if (data.success) {
+
+                    // Show the sow performance overlay
+                } else {
+                    alert("Failed to fetch sow data. Please try again.");
+                }
+            }
+        });
+        $("#sow_Perf_overlay").show();
+        
     $("#close_sow_perf_overlay").click(function() {
         $("#sow_Perf_overlay").hide();
     });
@@ -911,7 +933,111 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     
   });
+document.addEventListener("DOMContentLoaded", function () {
+    var ctx = document.getElementById('indivSowPerformance1').getContext('2d');
 
+    var sowID = $(this).data("sow.pig_id");
+
+    const data = {
+        labels: [
+          'Alive',
+          'MK',
+          'SB',
+          'MFFD',
+        ],
+        datasets: [{
+          label: 'Weanlings',
+          data: [3, 2, 4, 1],
+          backgroundColor: [
+            'rgb(255, 99, 132)',
+            'rgb(54, 162, 235)',
+            'rgb(255, 205, 86)',
+            'rgb(205, 215, 86)'
+          ],
+          hoverOffset: 4
+        }]
+      };
+
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: data,
+      options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+          legend: {
+            display: true,
+          },
+          title: {
+            display: true,
+            text: 'Total Litter'
+            },
+          tooltip: {
+            enabled: true,
+            callbacks: {
+              label: function (context) {
+                var label = context.label || '';
+                var value = context.parsed || 0;
+                return label + ': ' + value + '%';
+              },
+            },
+          },
+        },
+      },
+    });
+    
+  });
+document.addEventListener("DOMContentLoaded", function () {
+    var ctx = document.getElementById('indivSowPerformance2').getContext('2d');
+
+    const data = {
+    labels: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul'],
+    datasets: [
+        {
+        label: 'Alive',
+        data: [5,6,3,7,2,2,4],
+        fill: false,
+        borderColor: 'rgba(255, 99, 132, 1)',
+        },
+        {
+        label: 'MK',
+        data: [2,1,2,4,4,8,4],
+        fill: false,
+        borderColor: 'rgba(195, 99, 132, 1)',
+        },
+        {
+        label: 'SB',
+        data: [3,6,9,5,5,7,1],
+        fill: false,
+        borderColor: 'rgba(155, 99, 132, 1)',
+        },
+        {
+        label: 'MFFD',
+        data: [3,3,5,1,6,3,5],
+        fill: false,
+        borderColor: 'rgba(205, 99, 132, 1)',
+        }
+    ]
+    };
+    
+    new Chart (ctx, {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Monthly Sow Litter'
+            }
+            }
+        },
+    })
+    
+  });
 
   document.addEventListener("DOMContentLoaded", function () {
     var saleMonthsData = JSON.parse(document.getElementById("saleMonths").textContent);

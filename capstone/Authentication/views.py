@@ -591,6 +591,26 @@ def get_sow_data(request, pig_id):
         return JsonResponse({'success': False, 'error': 'Sow not found'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+    
+def get_sow_perf(request, pig_id):
+    try:
+        sow_perf = SowPerformance.objects.get(pk=pig_id)
+
+        # Serialize the sow data into a dictionary
+        sow_perf_data = {
+            'sow_no': sow_perf.pig_id,
+            'sow_alive': sow_perf.alive,
+            'sow_mk': sow_perf.mk,
+            'sow_sb': sow_perf.sb,
+            'sow_mffd': sow_perf.mffd,
+            # Add more fields as needed
+        }
+
+        return JsonResponse({'success': True, 'sow_data': sow_perf_data})
+    except SowPerformance.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Sow Performance not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 def update_sow_data(request, sow_id, user_type):
     try:
