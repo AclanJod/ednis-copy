@@ -2,7 +2,6 @@ from django.db import models
 from datetime import date 
 
 class User(models.Model):
-    
     firstname = models.CharField(max_length=100, default="Juan") 
     lastname = models.CharField(max_length=100, default="De la Cruz")
     username = models.CharField(max_length=255)
@@ -16,6 +15,8 @@ class User(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
     
     date = models.DateField(default=date.today) 
+
+    archive_user = models.BooleanField(default=False) 
 
 class Task(models.Model):
 

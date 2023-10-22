@@ -1,13 +1,12 @@
 {% load static %}
-<div class="z-0 sidebar col-md-3 col-lg-2 p-0 custom_bg vh-100">
+<div class="sidebar border border-right col-md-3 col-lg-2 p-0 custom_bg">
     <img src="{% static 'img/user_profile.png' %}" class="rounded mx-auto d-block my-2" style="height: 100px;" alt="...">
-    <span class="text-white fw-bold fs-3 d-flex justify-content-around"> Administrator </span>
     <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
-        <ul class="nav flex-column custom_bg" style="transform: translateY(5%);">
+        <ul class="nav flex-column custom_bg">
             <li class="nav-item">
                 <form action="{% url 'Pigs' user_type=user_type %}" method="get">
                     <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
-                        <svg class="bi icon ms-3"><use xlink:href="#house-fill"/></svg>
+                        <svg class="bi icon"><use xlink:href="#house-fill"/></svg>
                         DASHBOARD
                     </button>
                 </form> 
@@ -15,7 +14,7 @@
             <li class="nav-item">
                 <form action="{% url 'Add_Pigs' user_type=user_type %}" method="get">
                     <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
-                        <svg class="bi icon ms-3"><use xlink:href="#plus-circle"/></svg>
+                        <svg class="bi icon"><use xlink:href="#plus-circle"/></svg>
                         MANAGE PIGS
                     </button>
                 </form>
@@ -23,7 +22,7 @@
             <li class="nav-item">
                 <form action="{% url 'set_sched' user_type=user_type %}" method="get">
                     <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
-                        <svg class="bi icon ms-3"><use xlink:href="#calendar3"/></svg>
+                        <svg class="bi icon"><use xlink:href="#calendar3"/></svg>
                         SET SCHEDULE
                     </button>
                 </form>
@@ -31,7 +30,7 @@
             <li class="nav-item">
                 <form action="{% url 'manage_user' user_type=user_type %}" method="get">
                     <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
-                        <svg class="bi icon ms-3"><use xlink:href="#people"/></svg>
+                        <svg class="bi icon"><use xlink:href="#people"/></svg>
                         MANAGE USERS
                     </button>
                 </form>
@@ -39,7 +38,7 @@
             <li class="nav-item">
                 <form action="{% url 'reports' user_type=user_type %}" method="get">
                     <button type="submit" class="nav-link d-flex align-items-center gap-2 custom_nav">
-                        <svg class="bi icon ms-3"><use xlink:href="#graph-up"/></svg>
+                        <svg class="bi icon"><use xlink:href="#graph-up"/></svg>
                         REPORTS
                     </button>
                 </form>
@@ -48,7 +47,7 @@
 
         <ul class="nav flex-column mb-auto custom_bottom">
             <li class="nav-item">
-                <button class="z-1 nav-link d-flex align-items-center gap-2 custom_logout" onclick="window.location.href='http://127.0.0.1:8000/'" style="transform: translateY(50%);">
+                <button class="nav-link d-flex align-items-center gap-2 custom_logout" onclick="window.location.href='http://127.0.0.1:8000/'">
                     <svg class="bi icon" id="logout-icon">
                         <use xlink:href="#door-closed"/>
                     </svg>

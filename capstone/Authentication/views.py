@@ -162,11 +162,13 @@ def manage_user(request, user_type):
             # Redirect to the same page to prevent form resubmission
             return redirect('manage_user', user_type=user_type)
      # Retrieve a queryset of User objects from your database
-    users = User.objects.all()
-    users_count = User.objects.filter(role='user').count()
+    users = User.objects.filter(archive_user='False')
+    users_in_archive = User.objects.filter(archive_user='True')
+    users_count = User.objects.filter(role='user',  archive_user=False).count()
+    users__in_archive_count = User.objects.filter(role='user',  archive_user=True).count()
 
     # Render the manage_user page
-    return render(request, 'Farm/manage_user.html', {"users": users,"user_type": user_type, "users_count" :users_count })
+    return render(request, 'Farm/manage_user.html', {"users": users,"user_type": user_type, "users_count" :users_count, "users_in_archive":users_in_archive, "users__in_archive_count":users__in_archive_count})
 
 from collections import defaultdict
 from datetime import datetime
@@ -222,21 +224,53 @@ def reports(request, user_type):
     # Calculate the percentage of vaccinated pigs
     total_pigs = len(pig_data)
     percentage_vaccinated = (vaccinated_pigs / total_pigs) * 100
+    vaccine_counts = Vaccine.objects.values('vaccine').annotate(count=Count('pig_id', distinct=True))
+    all_vaccine_options = ["MH", "HPS", "PRRS", "PCV", "HCV1", "SIV", "APP", "HCV2", "PRV"]
+    vaccinated_per_vaccine_counts = Vaccine.objects.values('vaccine').annotate(count=Count('pig_id', distinct=True))
+    vaccine_counts_dict = {option: 0 for option in all_vaccine_options}
+    vaccine_needed = {}
+
+    for entry in vaccinated_per_vaccine_counts:
+        vaccine_counts_dict[entry['vaccine']] = entry['count']
+
+    for option in all_vaccine_options:
+        vaccinated_pigs_for_need = vaccine_counts_dict.get(option, 0)
+        vaccine_needed[option] = total_pigs - vaccinated_pigs_for_need
+
+    
+    # Update counts based on available data
+    unvaccinated_counts = {option: total_pigs - count for option, count in vaccine_counts_dict.items()}
 
     # Separate the dictionaries into lists for months and counts
     months, counts = zip(*monthly_counts.items())
     sale_months, sale_counts = zip(*monthly_sale_counts.items())
     mortality_dates, mortality_counts = zip(*monthly_mortality_counts.items())
 
-    consumption_rate_per_pig = 1.2
+    twenty_eight_days_ago = date.today() - timedelta(days=28)
+    eighty_eight_days_ago = date.today() - timedelta(days=88)
+    one_forty_eight_days_ago = date.today() - timedelta(days=148)
+    pig_list_28_days = Pig.objects.filter(dob__gte=twenty_eight_days_ago).exclude(exclude_q).count() 
+    pig_list_28_to_88_days = Pig.objects.filter(dob__gte=eighty_eight_days_ago, dob__lt=twenty_eight_days_ago).exclude(exclude_q).count() 
+    pig_list_88_to_148_days = Pig.objects.filter(dob__gte=one_forty_eight_days_ago, dob__lt=eighty_eight_days_ago).exclude(exclude_q).count() 
+    pig_list_greater_than_148_days = Pig.objects.filter(dob__lt=one_forty_eight_days_ago).exclude(exclude_q).count() 
+
+    consumption_rate_suckling = 1.5
+    consumption_rate_weanlings = 2.5
+    consumption_rate_grower= 4
+    consumption_rate_fattener= 6
+
     total_pigs_for_feeds= Pig.objects.exclude(exclude_q).count() 
-    total_feed_needed = total_pigs_for_feeds * consumption_rate_per_pig
+    total_feed_needed_suckling = pig_list_28_days * consumption_rate_suckling
+    total_feed_needed_weanling = pig_list_28_to_88_days * consumption_rate_weanlings
+    total_feed_needed_grower = pig_list_88_to_148_days * consumption_rate_grower
+    total_feed_needed_fattener = pig_list_greater_than_148_days * consumption_rate_fattener
 
     # You can round the result or format it as needed
-    total_feed_needed_formatted = "{:.2f}".format(total_feed_needed)
+    total_feed_suckling_formatted = "{:.2f}".format(total_feed_needed_suckling )
+    total_feed_weanling_formatted = "{:.2f}".format(total_feed_needed_weanling )
+    total_feed_grower_formatted = "{:.2f}".format(total_feed_needed_grower )
+    total_feed_fattener_formatted = "{:.2f}".format(total_feed_needed_fattener)
 
-
-    twenty_eight_days_ago = date.today() - timedelta(days=28)
     weanlings_count = Pig.objects.filter(dob__gte=twenty_eight_days_ago).exclude(exclude_q).count()
     unique_weanling_ids = Weanling.objects.values('pig_id').annotate(count=Count('pig_id')).count()
 
@@ -283,15 +317,16 @@ def reports(request, user_type):
 
     for ration, difference in below_threshold_rations.items():
         if difference <= 0:
-            prescription = f"Warning! You have {difference} sacks of {ration} feeds.Order now!"
+            feeds_prescription = f"Warning! You have {difference} sacks of {ration} feeds.Order now!"
         else:
-            prescription = f"Warning! You have {difference} remaining sacks of {ration} feeds, Consider ordering."
+            feeds_prescription = f"Warning! You have {difference} remaining sacks of {ration} feeds, Consider ordering."
 
-        stock_prescriptions.append(prescription)
+        stock_prescriptions.append(feeds_prescription)
     
     feed_expenses = FeedsInventory.objects.values('date').annotate(total_cost=Sum('cost'))
     dates = [item['date'].strftime('%Y-%m-%d') for item in feed_expenses]
     total_costs = [float(item['total_cost']) for item in feed_expenses]
+
 
     context = {
         "user_type": user_type,
@@ -305,7 +340,14 @@ def reports(request, user_type):
         "total_pigs": total_pigs,
         "vaccinated_pigs": vaccinated_pigs,
         "total_pigs_for_feeds":total_pigs_for_feeds,
-        "total_feed_needed_formatted": total_feed_needed_formatted, 
+        "total_feed_suckling_formatted":total_feed_suckling_formatted,
+        "total_feed_weanling_formatted":total_feed_weanling_formatted,
+        "total_feed_grower_formatted":total_feed_grower_formatted,
+        "total_feed_fattener_formatted":total_feed_fattener_formatted,
+        'pig_list_28_days': pig_list_28_days,
+        'pig_list_28_to_88_days': pig_list_28_to_88_days,
+        'pig_list_88_to_148_days': pig_list_88_to_148_days,
+        'pig_list_greater_than_148_days': pig_list_greater_than_148_days,
         "mortality_rate": mortality_rate,
         "average_monthly_mortality_rate":average_monthly_mortality_rate,
         "top_mortality_causes": top_mortality_causes,
@@ -320,22 +362,19 @@ def reports(request, user_type):
         "stock_prescriptions":stock_prescriptions, 
         "feed_expenses_dates": json.dumps(dates),
         "feed_expenses_costs": json.dumps(total_costs),
+        'vaccine_needed': json.dumps(vaccine_needed),
+        "vaccine_counts_dict":json.dumps(vaccine_counts_dict),
+        "unvaccinated_counts": json.dumps(unvaccinated_counts),
 
     }
-    for ration, difference in below_threshold_rations.items():
-        if difference <= 0:
-            feeds_prescription = f"Warning! You have {difference} sacks of {ration} feeds.Order now!"
-        else:
-            feeds_prescription = f"Warning! You have {difference} remaining sacks of {ration} feeds, Consider ordering."
 
-        stock_prescriptions.append(feeds_prescription)
-                                   
     return render(request, 'Farm/reports.html', context)
 
 
 
 def data_entry(request, user_type):
     # Get a list of pig IDs that have a PigSale entry
+    current_date = timezone.now().date()
     pig_sales_ids = PigSale.objects.values_list('pig_id', flat=True)
     weanling_pig_ids = Weanling.objects.values_list('pig_id', flat=True)
 
@@ -347,7 +386,7 @@ def data_entry(request, user_type):
     pigs = Pig.objects.exclude(id__in=excluded_pigs)
     piglets = Pig.objects.exclude(id__in=excluded_piglets )
 
-    return render(request, 'Farm/data_entry.html', {"user_type": user_type, 'pigs': pigs, 'pig_sales_ids': pig_sales_ids, 'sows':sows, 'piglets': piglets})
+    return render(request, 'Farm/data_entry.html', {"user_type": user_type, 'pigs': pigs, 'pig_sales_ids': pig_sales_ids, 'sows':sows, 'piglets': piglets, 'date': current_date})
 
 
 
@@ -1064,3 +1103,19 @@ def get_sow_performance_data(request, pig_id):
         return JsonResponse({'success': False, 'error': 'Sow not found'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+def archive_user(request, user_id):
+    if request.method == 'POST':
+        # Retrieve the user with the given user_id (you can use get_object_or_404 or similar)
+        user = User.objects.get(pk=user_id)
+
+        # Perform the archive action by setting the archive_user field to True
+        user.archive_user = True
+        user.save()
+
+        # You can return a JSON response to confirm the successful archive
+        return JsonResponse({'message': 'User archived successfully'})
+
+    # Handle other HTTP methods if needed
+    return JsonResponse({'message': 'Invalid request method'}, status=400)

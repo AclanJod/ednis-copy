@@ -655,7 +655,6 @@ new Chart(ctx, {
     ],
   },
   options: {
-    responsive: false,
     scales: {
       x: {
         title: {
@@ -764,6 +763,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var noTaskImageUrl = "/static/img/No_Task.png"
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
+        
         // Configuration options
         initialView: 'dayGridMonth',
     
@@ -860,7 +860,83 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+    // Get the overlay and buttons
+    var archiveOverlay = document.getElementById("archive-overlay");
+    var confirmButton = document.getElementById("confirm-archive");
+    var cancelButton = document.getElementById("cancel-archive");
 
+    // Get the archive_user buttons
+    var archiveUserButtons = document.querySelectorAll(".archive_user");
+
+    // Variable to store the user ID for archiving
+    var userIdToArchive = null;
+
+    // Function to send an AJAX request to update the user status
+    // Function to send an AJAX request to archive the user
+function archiveUser() {
+    // Check if a user ID is set
+    if (userIdToArchive) {
+        // Send an AJAX request to archive the user
+        fetch("/archive_user/" + userIdToArchive + "/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"), // Ensure you have a function to get the CSRF token
+                "Content-Type": "application/json",
+            },
+        })
+            .then(function (response) {
+                if (response.status === 200) {
+                    // Successfully archived, hide the overlay
+                    archiveOverlay.style.display = "none";
+                }
+            })
+            .catch(function (error) {
+                console.error("Error archiving user: " + error);
+            });
+    }
+}
+    // Add a click event listener to each archive_user button
+    archiveUserButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            // Get the user ID from the button's data attribute
+            userIdToArchive = button.getAttribute("data-user-id");
+
+            // Display the confirmation overlay
+            archiveOverlay.style.display = "block";
+        });
+    });
+
+    // Handle the "OK" button click
+    confirmButton.addEventListener("click", function () {
+        // Perform the archive action (send AJAX request)
+        archiveUser();
+    });
+
+    // Handle the "Cancel" button click
+    cancelButton.addEventListener("click", function () {
+        // Hide the overlay without archiving
+        archiveOverlay.style.display = "none";
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    var showSowButton = document.getElementById("showSowButton");
+    var showPigsButton = document.getElementById("showPigsButton");
+    var sowSection = document.getElementById("sowSection");
+    var pigsSection = document.getElementById("pigsSection");
+
+    // Add event listeners for the buttons
+    showSowButton.addEventListener("click", function () {
+        sowSection.style.display = "block";
+        pigsSection.style.display = "none";
+    });
+
+    showPigsButton.addEventListener("click", function () {
+        sowSection.style.display = "none";
+        pigsSection.style.display = "block";
+    });
+});
 
 document.addEventListener("DOMContentLoaded", function () {
     var totalPigs = parseInt(document.getElementById("totalPigs").textContent);
@@ -946,7 +1022,6 @@ document.addEventListener("DOMContentLoaded", function () {
         ],
       },
       options: {
-        responsive: false,
         scales: {
           x: {
             title: {
@@ -1008,7 +1083,6 @@ document.addEventListener("DOMContentLoaded", function () {
             ],
         },
         options: {
-            responsive: false,
             scales: {
                 x: {
                     title: {
@@ -1229,6 +1303,114 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Get the values from the Django template
+    var vaccineCountsDict = JSON.parse(document.getElementById("vaccine_counts_dict").textContent);
+    var totalPigs = parseInt(document.getElementById("totalPigs").textContent);
+
+    // Calculate the percentages for each vaccine count
+    var percentages = {};
+    for (var key in vaccineCountsDict) {
+        percentages[key] = ((vaccineCountsDict[key] / totalPigs) * 100).toFixed(2);
+    }
+
+    // Separate the vaccine names and percentage counts into arrays
+    var vaccineNames = Object.keys(percentages);
+    var percentageCounts = Object.values(percentages);
+
+    // Define an array of colors
+    var colors = ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'];
+    // Add more colors as needed
+
+    // Create the labels for the bar chart (vaccine names)
+    var labels = vaccineNames;
+
+    // Create the bar chart
+    var ctx = document.getElementById('vaccine_counts_chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Percentage of Vaccinated Pigs',
+                data: percentageCounts,
+                backgroundColor: colors, 
+                borderColor: colors, 
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: false,
+            indexAxis: 'y',
+            responsive: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Percentage (%)'
+                    },
+                    suggestedMin: 0, // Set the minimum value for the x-axis
+                    suggestedMax: 100, // Set the maximum value for the x-axis
+                },
+                y: {
+                    beginAtZero: true,
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return context.dataset.label + ' ' + context.parsed.x + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Get the values from the Django template
+    var unvaccinatedCountsDict = JSON.parse(document.getElementById("unvaccinated_counts").textContent);
+    var vaccineNeededDict = JSON.parse(document.getElementById("vaccine_needed").textContent);
+
+    // Extract data from dictionaries
+    var unvaccinatedCounts = Object.values(unvaccinatedCountsDict);
+    var vaccineNeededCounts = Object.values(vaccineNeededDict);
+    var labels = Object.keys(unvaccinatedCountsDict); 
+
+    // Create the bar chart
+    var ctx = document.getElementById('vaccine_needed_bar_chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Vaccine Needed',
+                    data: vaccineNeededCounts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
     // Get references to the button and overlay elements
     var buttons = document.querySelectorAll(".sow_perf_button");
     var overlay = document.getElementById("sow_perf_overlay");
@@ -1240,7 +1422,7 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             // Extract the sow_id from the button's data attribute
             var sowId = button.getAttribute("data-sow-id");
-
+            console.log(sowId);
             // AJAX request to fetch sow performance data
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/get_sow_performance_data/" + sowId + "/");
@@ -1255,13 +1437,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             // Clear the "No data found" message
                             dataContainer.innerHTML = "";
 
-                            // Create HTML content for sow performance data
-                            var htmlContent = "";
-                            sowData.forEach(function (sow) {
-                                htmlContent += "Pig ID: " + sow.pig_id + "<br><br>";
-                                // Add more fields as needed
-                            });
+                            // Extract pig_id from the first sow performance
+                            var pigId = sowData[0].pig_id;
 
+                            // Create HTML content for sow performance data
+                            var htmlContent = "Pig ID: " + pigId + "<br><br>";
                             dataContainer.innerHTML = htmlContent;
 
                             // Create the pie chart
@@ -1284,7 +1464,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             });
 
                             var pieChart = new Chart(document.getElementById('myPieChart'), {
-                                type: 'doughnut',
+                                type: 'pie',
                                 data: {
                                     labels: ['Alive', 'MK', 'SB', 'Mffd'],
                                     datasets: [{
@@ -1312,7 +1492,45 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add a click event listener to the close button
     closeButton.addEventListener("click", function () {
-  
         overlay.style.display = "none";
     });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    var pigSalesButton = document.getElementById("showPigSalesButton");
+    var vaccinationButton = document.getElementById("showVaccinationButton");
+    var feedsButton = document.getElementById("showFeedsButton");
+    var mortalityButton = document.getElementById("showMortalityButton");
+
+    var pigSalesSection = document.getElementById("pigSalesSection");
+    var vaccinationSection = document.getElementById("vaccinationSection");
+    var feedsSection = document.getElementById("feedsSection");
+    var mortalitySection = document.getElementById("mortalitySection");
+
+    pigSalesButton.addEventListener("click", function () {
+        showContent(pigSalesSection);
+    });
+
+    vaccinationButton.addEventListener("click", function () {
+        showContent(vaccinationSection);
+    });
+
+    feedsButton.addEventListener("click", function () {
+        showContent(feedsSection);
+    });
+
+    mortalityButton.addEventListener("click", function () {
+        showContent(mortalitySection);
+    });
+
+    function showContent(section) {
+        // Hide all sections
+        pigSalesSection.style.display = "none";
+        vaccinationSection.style.display = "none";
+        feedsSection.style.display = "none";
+        mortalitySection.style.display = "none";
+
+        // Show the selected section
+        section.style.display = "block";
+    }
 });
