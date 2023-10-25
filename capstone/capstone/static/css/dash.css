@@ -566,6 +566,16 @@ button.success-button {
     z-index: 1000; 
     box-shadow: 2px #659D60;
 }
+.sow-perf-container{
+    background-color: #FFFF;
+    position: relative;
+    width: 100%;
+    top: 50%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    z-index: 1001; 
+}
 
 .archive-overlay {
     display: none;

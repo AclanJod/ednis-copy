@@ -920,6 +920,7 @@ function archiveUser() {
     });
 });
 
+
 document.addEventListener("DOMContentLoaded", function () {
     var showSowButton = document.getElementById("showSowButton");
     var showPigsButton = document.getElementById("showPigsButton");
@@ -1445,9 +1446,9 @@ document.addEventListener("DOMContentLoaded", function () {
                             dataContainer.innerHTML = htmlContent;
 
                             // Create the pie chart
-                            var chartCanvas = document.createElement('canvas');
-                            chartCanvas.id = 'myPieChart';
-                            dataContainer.appendChild(chartCanvas);
+                            var pieChartCanvas = document.createElement('canvas');
+                            pieChartCanvas.id = 'myPieChart';
+                            dataContainer.appendChild(pieChartCanvas);
 
                             var combinedData = {
                                 alive: 0,
@@ -1463,7 +1464,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 combinedData.mffd += sow.mffd;
                             });
 
-                            var pieChart = new Chart(document.getElementById('myPieChart'), {
+                            var pieChart = new Chart(pieChartCanvas, {
                                 type: 'pie',
                                 data: {
                                     labels: ['Alive', 'MK', 'SB', 'Mffd'],
@@ -1472,7 +1473,41 @@ document.addEventListener("DOMContentLoaded", function () {
                                         backgroundColor: ['#FDE387', '#659D60', '#FF7373', '#127BBE'],
                                     }]
                                 },
+                                options: {
+                                    responsive: false,
+                                },
                             });
+                             // Create the line chart
+                             var lineChartCanvas = document.createElement('canvas');
+                             lineChartCanvas.id = 'myLineChart';
+                             dataContainer.appendChild(lineChartCanvas);
+ 
+                             // Replace this with your line chart data
+                             // Extract the data for the line chart from the sow performance data
+                                 var lineChartData = {
+                                     labels: sowData.map(function (sow) {
+                                         // Use the 'date_farr' field for the X-axis labels
+                                         return sow.date_farr;
+                                     }),
+                                     datasets: [{
+                                         label: 'Average Litter Size',
+                                         data: sowData.map(function (sow) {
+                                             // Use the 'ave_litter_size' field for the Y-axis data
+                                             return sow.ave_litter_size;
+                                         }),
+                                         borderColor: 'rgba(75, 192, 192, 1)',
+                                         fill: false
+                                     }]
+                                 };
+ 
+                                 var lineChart = new Chart(lineChartCanvas, {
+                                     type: 'line',
+                                     data: lineChartData,
+                                     options: {
+                                        responsive: false,
+                                     },
+                                 });
+ 
                         } else {
                             dataContainer.innerHTML = "No sow performance data found.";
                         }
