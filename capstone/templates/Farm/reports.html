@@ -33,45 +33,45 @@
 <div id="pigSalesSection">
     <div class="row mt-2">
         <div class="col">
-            <div class="container rounded">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
                         MONTHLY PIG SALES
                     </span>
                 </div>
-                <select class="mt-2 rounded" id="selectYear"></select>
+                <select class="mt-2 ms-2 rounded" id="selectYear"></select>
                 <canvas id="salesLineChart" width="560" height="250"></canvas>
             </div>
         </div>
         <div class="col">
-            <div class="container rounded">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top" style="background-color: #ff7b7b; box-sizing: border-box;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
                         MONTHLY PIG REGISTERED
                     </span>
                 </div>
-                <select class="mt-2 rounded" id="selectPigBarYear"></select>
-                <canvas id="pigBarChart" width="560" height="250"></canvas>
+                <select class="mt-2 ms-2 rounded" id="selectPigBarYear"></select>
+                <canvas class="ms-2" id="pigBarChart" width="560" height="250"></canvas>
             </div>
         </div>
     </div>
     <div class="row mt-3">
         <div class="col">
-            <div class="container rounded">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
                         MONTHLY PIG WEIGHT AVERAGE
                     </span>
                 </div>
-                <select class="mt-2 rounded" id="selected_year_for_weight"></select>
-                <canvas id="weightBarChart"></canvas>
+                <select class="mt-2 ms-2 rounded" id="selected_year_for_weight"></select>
+                <canvas id="weightBarChart" width="560" height="250"></canvas>
             </div>
         </div>        
         <div class="col">
-            <div class="container rounded">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
@@ -85,32 +85,32 @@
 </div>
 
 <div id="vaccinationSection" style="display: none;">
-    <div class="row mt-3">
+    <div class="row mt-1">
         <div class="col">
-            <div class="container rounded">
-                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
-                    <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                        VACCINATION PROGRESS
+            <div class="graph-container rounded" style="height: 33%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+                <div class="rounded-top" style="background-color: #ff7b7b;">
+                    <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 5%;">
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                        VACCINATION RATE
                     </span>
                 </div>
                 <canvas id="vaccinationProgress" width="400" height="150"  style="margin:2%;"></canvas>
             </div>
         </div>
         <div class="col">
-            <div class="row">
-                <div class="container rounded">
-                    <div class="rounded-top w-100" style="background-color: #ff7b7b;">
-                        <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                        <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+            <div class="row-1">
+                <div class="graph-container rounded" style="height: 50%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+                    <div class="rounded-top" style="background-color: #ff7b7b;">
+                        <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 5%;">
+                        <span class="mx-3 pt-2 fs-5 text-white fw-bold">
                             VACCINES NEEDED
                         </span>
                     </div>
-                    <canvas id="vaccine_needed_bar_chart" width="590" height="280"></canvas>
+                    <canvas id="vaccine_needed_bar_chart" width="560" height="250" style="margin:2%;"></canvas>
                 </div>
             </div>
-            <div class="row mt-2">
-                <div class="container rounded">
+            <div class="row-1">
+                <div class="graph-container rounded" style="height: 50%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                     <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                         <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                         <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
@@ -127,7 +127,7 @@
 <div id="feedsSection" style="display: none;">
     <div class="row mt-3">
         <div class="col">
-            <div class="container rounded">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
@@ -140,7 +140,7 @@
             </div>
         </div>
         <div class="col">
-            <div class="container rounded mt-3 pe-2">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
@@ -159,18 +159,18 @@
     
     <div class="row mt-3">
         <div class="col">
-            <div class="container rounded mt-3 pe-2" style="height: 20%; transform: translateY(-2%)">
-                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
+            <div class="graph-container rounded" style="height: 93%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+                <div class="rounded-top" style="background-color: #ff7b7b; width: 100%;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
                         MONTHLY EXPENSES
                     </span>
                 </div>
-                <canvas id="expensesBarChart" width="550" height="350"></canvas>
+                <canvas class="m-0" id="expensesBarChart" width="550" height="325"></canvas>
             </div>
         </div>
         <div class="col">
-            <div class="container rounded">
+            <div class="graph-container rounded" style="height: 93%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
@@ -195,7 +195,7 @@
 
 <div id="mortalitySection" style="display: none;">
     <div class="col-4 mt-5">
-        <div class="graph-container" style="height: 93%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+        <div class="graph-container rounded" style="height: 80%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
             <div class="rounded-top" style="background-color: #ff7b7b;">
                 <img src="{% static 'img/mortality_icon.png' %}" class="ms-2" style="width: 3%;">
                 <span class="mx-3 fs-5 text-white fw-bold">

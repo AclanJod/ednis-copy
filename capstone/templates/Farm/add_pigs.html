@@ -2,24 +2,28 @@
 {% load static %}
 {% block content %}
 <div>Manage Pigs</div>
-<div class="navbar mb-1">
-    <div class="d-flex" >
-    <button class="custom_button mx-2" id="openOverlayButton" style="border-radius: 20px; width: 100px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;">ADD PIGS</button>
-    <button class="custom_button mx-2" id="openOverlayButton1" style="border-radius: 20px; width: 100px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;">ADD SOW</button>
-    </div> 
-    <form method="post" action="{% url 'search_suggestions' %}">
-        {% csrf_token %}
-        <input type="text" id="search-input" placeholder="Search...">
-        <button>Search</button>
-    </form>   
+<div class="navbar mb-1" style="height: 8.5%;">
+    <div class="d-flex justify-content-between mt-2" style="width: 100%;">
+        <div>
+            <button class="custom_button mx-2" id="openOverlayButton" style="border-radius: 20px; width: 100px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;">ADD PIGS</button>
+            <button class="custom_button mx-2" id="openOverlayButton1" style="border-radius: 20px; width: 100px; height: 30px; background-color: #FFFFFF; color: #ff7b7b;">ADD SOW</button>
+        </div>
+        <div>
+            <form method="post" action="{% url 'search_suggestions' %}">
+                {% csrf_token %}
+                <input type="text" id="search-input" placeholder="Search...">
+                <button>Search</button>
+            </form>   
+        </div>
+    </div>
 </div>
 <div id="search-results" style="background-color: #FFFFFF;display: none; height: 200px; width: 10%; overflow-y: auto; position: absolute; right: 8%; top:12%; z-index:3000;"></div>
 <div class="row ms-2 d-flex justify-content-around">
     <div class="col">
-        <button id="showSowButton" class="menu_button" style="width: 555px;">Show Sow</button>
+        <button id="showPigsButton" class="menu_button" style="width: 555px;">Show Pigs</button>
     </div>
     <div class="col">
-        <button id="showPigsButton" class="menu_button" style="width: 555px;">Show Pigs</button>
+        <button id="showSowButton" class="menu_button" style="width: 555px;">Show Sow</button>
     </div>
 </div>
 
@@ -39,7 +43,7 @@
                 <div class="d-flex flex-column m-1" style="overflow-y: scroll; -ms-overflow-style: none; scrollbar-width: none;">
                     <div class="d-flex flex-wrap">
                         {% for sow in sow_list %}
-                        <div class="bg-light border border-dark py-2 m-1 text-decoration-none d-flex justify-content-between" style="width: 32.5%;">
+                        <div class="bg-light border border-dark py-2 m-1 text-decoration-none d-flex flex-nowrap justify-content-between" style="width: 32.5%;">
                             <div class="ms-3">
                                 <span>{{ sow.pig_id }}</span>
                                 <p class="m-0 p-0">Status: {{ sow.remarks }}</p>
@@ -511,7 +515,7 @@
         </div>
         <form id="edit_sow_form" class="mt-2">
             <!-- Editable fields for sow data -->
-            <div class="d-flex flex-column align-items-end" style="width: 40%;">
+            <div class="d-flex flex-column align-items-end" style="width: 50%;">
                 <div class="form-group">
                     <label for="edit_sow_id">Sow ID:</label>
                     <input type="text" id="edit_sow_id" name="edit_sow_id" required value="{{ edit_sow_id }}">

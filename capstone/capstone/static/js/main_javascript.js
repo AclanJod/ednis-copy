@@ -1228,6 +1228,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ],
             },
             options: {
+                responsive: false,
                 scales: {
                     x: {
                         title: {
