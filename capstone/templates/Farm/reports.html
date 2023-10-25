@@ -3,17 +3,17 @@
 {% block content %}
 <div>Reports</div>
 
-<div id="months" style="display: none;">{{ months|safe }}</div>
-<div id="counts" style="display: none;">{{ counts|safe|default:"[]" }}</div>
+<div id="months"  style="display: none;">{{ months|safe }}</div>
+<div id="counts"  style="display: none;">{{ counts|safe|default:"[]" }}</div>
 <div id="totalPigs" style="display: none;">{{ total_pigs }}</div>
 <div id="vaccinatedPigs" style="display: none;">{{ vaccinated_pigs }}</div>
 <div id="salesData" style="display: none;">{{ sale_counts|safe }}</div>
-<div id="saleMonths" style="display: none;">{{ sale_months|safe }}</div>
+<div id="saleMonths" style="display: none;" >{{ sale_months|safe }}</div>
 <div id="mortalityData" style="display: none;">{{ mortality_counts|safe }}</div>
 <div id="mortalityDates" style="display: none;">{{ mortality_dates|safe }}</div>
 <div id="totalWeanlings" style="display: none;">{{ weanlings_count|safe|default:"[]" }}</div>
 <div id="weanlingsData" style="display: none;">{{ unique_weanling_ids|safe|default:"[]" }}</div>
-<div id="average_weights" style="display: none;">{{ average_weights |safe|default:"[]" }}</div>
+<div id="average_weights"  style="display: none;">{{ average_weights |safe|default:"[]" }}</div>
 <div id="quantity_by_ration_data"style="display: none;">{{ result| safe }}</div>
 <div id="quantity_by_ration_data"style="display: none;">{{ stock_prescriptions| safe }}</div>
 <div id="feed_expenses_dates" style="display: none;">{{ feed_expenses_dates|safe }}</div>
@@ -31,48 +31,51 @@
 </div>
 
 <div id="pigSalesSection">
-    <div class="row mt-3">
+    <div class="row mt-2">
         <div class="col">
-            <div class="container rounded" style="width: 90%;">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+            <div class="container rounded">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Monthly Sales
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        MONTHLY PIG SALES
                     </span>
                 </div>
-                <canvas id="salesLineChart" width="400%" height="200%"></canvas>
+                <select class="mt-2 rounded" id="selectYear"></select>
+                <canvas id="salesLineChart" width="560" height="250"></canvas>
             </div>
         </div>
         <div class="col">
             <div class="container rounded">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+                <div class="rounded-top" style="background-color: #ff7b7b; box-sizing: border-box;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Number of Pig Registration
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        MONTHLY PIG REGISTERED
                     </span>
                 </div>
-                <canvas id="pigBarChart" width="500%" height="270%"></canvas>
+                <select class="mt-2 rounded" id="selectPigBarYear"></select>
+                <canvas id="pigBarChart" width="560" height="250"></canvas>
             </div>
         </div>
     </div>
     <div class="row mt-3">
         <div class="col">
             <div class="container rounded">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Weight Average of Pigs
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        MONTHLY PIG WEIGHT AVERAGE
                     </span>
                 </div>
-                <canvas id="weightBarChart" width="400%" height="200%"></canvas>
+                <select class="mt-2 rounded" id="selected_year_for_weight"></select>
+                <canvas id="weightBarChart"></canvas>
             </div>
-        </div>
+        </div>        
         <div class="col">
             <div class="container rounded">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Weaning Progress
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        WEANING PROGRESS
                     </span>
                 </div>
                 <canvas id="weanlingsProgressBar" width="400" height="100"></canvas>
@@ -85,10 +88,10 @@
     <div class="row mt-3">
         <div class="col">
             <div class="container rounded">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Vaccination Progress
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        VACCINATION PROGRESS
                     </span>
                 </div>
                 <canvas id="vaccinationProgress" width="400" height="150"  style="margin:2%;"></canvas>
@@ -97,24 +100,24 @@
         <div class="col">
             <div class="row">
                 <div class="container rounded">
-                    <div class="rounded-top" style="background-color: #ff7b7b;">
+                    <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                         <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                        <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                            Needed Vaccines
+                        <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                            VACCINES NEEDED
                         </span>
                     </div>
-                    <canvas id="vaccine_needed_bar_chart" width="590" height="300"></canvas>
+                    <canvas id="vaccine_needed_bar_chart" width="590" height="280"></canvas>
                 </div>
             </div>
             <div class="row mt-2">
                 <div class="container rounded">
-                    <div class="rounded-top" style="background-color: #ff7b7b;">
+                    <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                         <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                        <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                            Number of Vaccines
+                        <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                            NUMBER OF VACCINES
                         </span>
                     </div>
-                    <canvas id="vaccine_counts_chart" width="590" height="300"></canvas>
+                    <canvas id="vaccine_counts_chart" width="590" height="280"></canvas>
                 </div>
             </div>
         </div>
@@ -125,53 +128,53 @@
     <div class="row mt-3">
         <div class="col">
             <div class="container rounded">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Feeds Inventory
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        FEED STOCKS
                     </span>
                 </div>
-                <canvas id="pieChart" width="550" height="250"></canvas>
+                <div class="d-flex justify-content-center">
+                    <canvas id="pieChart" width="350" height="250"></canvas>
+                </div>
             </div>
         </div>
         <div class="col">
-            <div class="container rounded">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+            <div class="container rounded mt-3 pe-2">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Feed Prescriptions
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        FEED PRESCRIPTION
                     </span>
                 </div>
-                <div class="mt-3 pe-2">
-                    <p>Prescription:</p>
-                    <ul>
-                        {% for prescription in stock_prescriptions %}
-                        <li>{{ prescription }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+                <p>Prescription:</p>
+                <ul>
+                    {% for prescription in stock_prescriptions %}
+                    <li>{{ prescription }}</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
     
     <div class="row mt-3">
         <div class="col">
-            <div class="container rounded">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+            <div class="container rounded mt-3 pe-2" style="height: 20%; transform: translateY(-2%)">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Monthly Feeds Expenses
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        MONTHLY EXPENSES
                     </span>
                 </div>
-                <canvas id="expensesBarChart" width="500" height="150"></canvas>
+                <canvas id="expensesBarChart" width="550" height="350"></canvas>
             </div>
         </div>
         <div class="col">
             <div class="container rounded">
-                <div class="rounded-top" style="background-color: #ff7b7b;">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                        Feed Prescriptions
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        FEED ESTIMATE
                     </span>
                 </div>
                 <div class="px-3 py-3">
