@@ -1066,7 +1066,7 @@ document.addEventListener("DOMContentLoaded", function () {
         cutout: '65%',
         plugins: {
           legend: {
-            display: false,
+            display: true,
           },
           tooltip: {
             enabled: true,
@@ -1076,6 +1076,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 var value = context.parsed || 0;
                 return label + ': ' + value.toFixed(2) + '%';
               },
+            },
+          },
+          title: {
+            display: true,
+            text: "Vaccination Rate",
+            align: 'center',
+            font: {
+                weight: 'bold',
             },
           },
         },
@@ -1686,7 +1694,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Create a new chart
         pigBarChart = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                 datasets: [

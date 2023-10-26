@@ -21,14 +21,14 @@ from datetime import date as today_date, timedelta
 from django.db.models.functions import ExtractDay
 from django.db.models import Sum, F
 from django.utils import timezone
+import pandas as pd
+from barcode import Code128
+import barcode
+from barcode import generate
+from barcode.writer import ImageWriter
 from io import BytesIO
 import base64
 from django.http import HttpResponse
-from barcode import Code128
-from barcode import generate
-from barcode.writer import ImageWriter
-import pandas as pd
-import barcode
 
 def generate_barcode(pig_id):
     # Create a Code128 barcode with the pig_id
