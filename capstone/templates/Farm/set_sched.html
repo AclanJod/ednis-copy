@@ -16,14 +16,14 @@
         <div class="scheduling-container">
             <form method="post" action="{% url 'set_sched' user_type=user_type %}">
                 {% csrf_token %}
-                <div class="d-flex flex-column align-items-end" style="width: 40%;">
+                <div class="d-flex flex-column align-items-end" style="width: 50%;">
                     <div>
                         <label class="taskname" for="taskname">Task Name:</label>
                         <input class="taskname" type="text" id="taskname" name="taskname"><br><br>
                     </div>
                     <div>
                         <label class="duedate" for="duedate">Due Date:</label>
-                        <input class="duedate" type="date" id="duedate" name="duedate"><br><br>
+                        <input class="duedate" style="width: 185px;" type="date" id="duedate" name="duedate"><br><br>
                     </div>
                     <div>
                         <label class="duetime" for="duetime">Due Time:</label>

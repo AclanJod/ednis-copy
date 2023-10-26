@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div>Reports</div>
 
 <div id="months"  style="display: none;">{{ months|safe }}</div>
 <div id="counts"  style="display: none;">{{ counts|safe|default:"[]" }}</div>
@@ -23,7 +22,7 @@
 <div id="vaccine_needed" style="display: none;">{{ vaccine_needed|safe }}</div>
 
 
-<div class="d-flex justify-content-around">
+<div class="d-flex justify-content-around my-2">
     <button id="showPigSalesButton" class="menu_button mx-2" style="width: 70%;">Pig Sales</button>
     <button id="showVaccinationButton" class="menu_button mx-2" style="width: 70%;">Vaccination</button>
     <button id="showFeedsButton" class="menu_button mx-2" style="width: 70%;">Feeds</button>
@@ -31,10 +30,10 @@
 </div>
 
 <div id="pigSalesSection">
-    <div class="row mt-2">
+    <div class="row">
         <div class="col">
             <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
-                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
+                <div class="rounded-top" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
                         MONTHLY PIG SALES
@@ -63,11 +62,11 @@
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                        MONTHLY PIG WEIGHT AVERAGE
+                        PIG SALE WEIGHT AVERAGE
                     </span>
                 </div>
                 <select class="mt-2 ms-2 rounded" id="selected_year_for_weight"></select>
-                <canvas id="weightBarChart" width="560" height="250"></canvas>
+                <canvas id="weightBarChart" width="575" height="250"></canvas>
             </div>
         </div>        
         <div class="col">
@@ -75,19 +74,20 @@
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                        WEANING PROGRESS
+                        WEANLING PROGRESS
                     </span>
                 </div>
-                <canvas id="weanlingsProgressBar" width="400" height="100"></canvas>
+                <canvas id="weanlingsProgressBar" width="400" height="100" style="margin: 2%;"></canvas>
+                <p class="m-2">Prescription: {{ weanlings_prescription }}</p>
             </div>
         </div>
     </div>
 </div>
 
 <div id="vaccinationSection" style="display: none;">
-    <div class="row mt-1">
+    <div class="row">
         <div class="col">
-            <div class="graph-container rounded" style="height: 33%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 5%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold">
@@ -99,18 +99,7 @@
         </div>
         <div class="col">
             <div class="row-1">
-                <div class="graph-container rounded" style="height: 50%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
-                    <div class="rounded-top" style="background-color: #ff7b7b;">
-                        <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 5%;">
-                        <span class="mx-3 pt-2 fs-5 text-white fw-bold">
-                            VACCINES NEEDED
-                        </span>
-                    </div>
-                    <canvas id="vaccine_needed_bar_chart" width="560" height="250" style="margin:2%;"></canvas>
-                </div>
-            </div>
-            <div class="row-1">
-                <div class="graph-container rounded" style="height: 50%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+                <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                     <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                         <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                         <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
@@ -122,25 +111,36 @@
             </div>
         </div>
     </div>
+    <div class="row-1">
+        <div class="graph-container rounded" style="height: 45%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+            <div class="rounded-top" style="background-color: #ff7b7b;">
+                <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 2.5%;">
+                <span class="mx-3 pt-2 fs-5 text-white fw-bold">
+                    VACCINES NEEDED
+                </span>
+            </div>
+            <canvas id="vaccine_needed_bar_chart" width="1100" height="250" class="ms-2" style="margin:2%;"></canvas>
+        </div>
+    </div>
 </div>
 
-<div id="feedsSection" style="display: none;">
-    <div class="row mt-3">
+<div id="feedsSection" style="overflow: hidden; display: none;">
+    <div class="row">
         <div class="col">
-            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
                         FEED STOCKS
                     </span>
                 </div>
-                <div class="d-flex justify-content-center">
-                    <canvas id="pieChart" width="350" height="250"></canvas>
+                <div>
+                    <canvas class="d-flex justify-content-around" id="pieChart" width="250" height="150"></canvas>
                 </div>
             </div>
         </div>
         <div class="col">
-            <div class="graph-container rounded" style="height: 100%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+            <div class="graph-container rounded" style="height: 100%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
@@ -156,68 +156,122 @@
             </div>
         </div>
     </div>
-    
-    <div class="row mt-3">
+    <div class="row mt-2">
         <div class="col">
-            <div class="graph-container rounded" style="height: 93%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
-                <div class="rounded-top" style="background-color: #ff7b7b; width: 100%;">
-                    <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
-                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                        MONTHLY EXPENSES
-                    </span>
-                </div>
-                <canvas class="m-0" id="expensesBarChart" width="550" height="325"></canvas>
-            </div>
-        </div>
-        <div class="col">
-            <div class="graph-container rounded" style="height: 93%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                        FEED ESTIMATE
+                        Estimation Suckling
+                    </span>
+                </div>
+                <div class="p-3">
+                    <p>Total Suckling Count: {{ pig_list_28_days}}</p>
+                    <p>Total Feed Needed: {{total_feed_suckling_formatted}} kilos</p>
+                    <p>Total Feed Available: {{ difference_booster }} kilos</p>
+                    <p>Feeds Deficit: {{ total_feed_suckling_deficit_formatted }} kilos which cost  ₱{{ total_feed_suckling_cost_formatted }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
+                    <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        Estimation Weanling
+                    </span>
+                </div>
+                <div class="p-3">
+                    <p>Total Weanling Count: {{ pig_list_28_to_88_days}}</p>
+                    <p>Total Feed Needed: {{ total_feed_weanling_formatted }} kilos</p>
+                    <p>Total Feed Available: {{difference_pre_starter }} kilos</p>
+                    <p>Feeds Deficit: {{total_feed_weanling_deficit_formatted }} kilos which cost  ₱{{ total_feed_weanling_cost_formatted}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
+                    <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        Estimation Grower
+                    </span>
+                </div>
+                <div class="p-3">
+                    <p>Total Grower Count: {{ pig_list_88_to_148_days}}</p>
+                    <p>Total Feed Needed: {{ total_feed_grower_formatted }} kilos</p>
+                    <p>Total Feed Available: {{ difference_starter }} kilos</p>
+                    <p>Feeds Deficit: {{ total_feed_grower_deficit_formatted }} kilos which cost  ₱{{ total_feed_grower_cost_formatted}}</p>
+                    <p>Total Feed Cost: {{ total_feed_grower_deficit_formatted }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+                <div class="rounded-top w-100" style="background-color: #ff7b7b;">
+                    <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+                    <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                        Estimation Fattener
+                    </span>
+                </div>
+                <div class="p-3">
+                    <p>Total Pig Count: {{pig_list_greater_than_148_days }}</p>
+                    <p>Total Fattener Needed: {{ total_feed_fattener_formatted}} kilos</p>
+                    <p>Total Feed Available: {{ difference_grower }} kilos</p>
+                    <p>Feeds Deficit: {{ total_feed_fattener_deficit_formatted }} kilos which cost  ₱{{total_feed_fattener_cost_formatted}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row-1">
+        <div class="graph-container rounded" style="height: 33.8%; width: 90%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); transform: translateY(-17%);">
+            <div class="rounded-top" style="background-color: #ff7b7b; width: 100%;">
+                <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
+                <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
+                    MONTHLY EXPENSES
+                </span>
+            </div>
+            <canvas class="ms-1" id="expensesBarChart" width="1050" height="240"></canvas>
+        </div>
+    </div>
+</div>
+
+<div id="mortalitySection" style="display: none;">
+    <div class="col-4">
+        <div class="row-1">
+            <div class="graph-container rounded" style="height: 40%; width: 200%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+                <div class="rounded-top" style="background-color: #ff7b7b;">
+                    <img src="{% static 'img/mortality_icon.png' %}" class="ms-2" style="width: 3%;">
+                    <span class="mx-3 fs-5 text-white fw-bold">
+                        Mortality Rate
+                    </span>
+                </div>
+                <canvas class="m-2" id="mortalityAreaChart" width="750%" height="200%"></canvas>
+            </div>
+        </div>
+        <div class="row-1">
+            <div class="graph-container rounded" style="height: 65%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+                <div class="rounded-top" style="background-color: #ff7b7b;">
+                    <img src="{% static 'img/mortality_icon.png' %}" class="ms-2" style="width: 3%;">
+                    <span class="mx-3 fs-5 text-white fw-bold">
+                        Mortality Prescription
                     </span>
                 </div>
                 <div class="px-3 py-3">
-                    <p>Total Suckling Count: {{ pig_list_28_days}}</p>
-                    <p>Total Feed Needed: {{ total_feed_suckling_formatted }} kilos</p>
-                    <p>Total Weanling Count: {{ pig_list_28_to_88_days}}</p>
-                    <p>Total Feed Needed: {{ total_feed_weanling_formatted }} kilos</p>
-                    <p>Total Grower Count: {{ pig_list_88_to_148_days}}</p>
-                    <p>Total Feed Needed: {{ total_feed_grower_formatted }} kilos</p>
-                    <p>Total Pig Count: {{pig_list_greater_than_148_days }}</p>
-                    <p>Total Fattener Needed: {{ total_feed_fattener_formatted}} kilos</p>
+                    <!-- Display the monthly mortality analysis here -->
+                    <p>Average Monthly Mortality Count: {{ mortality_rate|floatformat:"2" }}%</p>
+                    <p>This month ({{ current_year_month }}): {{ average_monthly_mortality_rate|floatformat:"2" }}%</p>
+                    <p>Prescription: {{ prescription }}</p>
+                    <p>Top Causes of Mortality:</p>
+                    <ul>
+                        {% for cause in top_mortality_causes %}
+                        <li>{{ cause.cause }}: {{ cause.count }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-
-<div id="mortalitySection" style="display: none;">
-    <div class="col-4 mt-5">
-        <div class="graph-container rounded" style="height: 80%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
-            <div class="rounded-top" style="background-color: #ff7b7b;">
-                <img src="{% static 'img/mortality_icon.png' %}" class="ms-2" style="width: 3%;">
-                <span class="mx-3 fs-5 text-white fw-bold">
-                    Monthly Mortality
-                </span>
-            </div>
-            <canvas id="mortalityAreaChart" width="500%" height="150%"></canvas>
-            <div class="px-3 py-3">
-                <!-- Display the monthly mortality analysis here -->
-                <p>Average Monthly Mortality Count: {{ mortality_rate|floatformat:"2" }}%</p>
-                <p>This month ({{ current_year_month }}): {{ average_monthly_mortality_rate|floatformat:"2" }}%</p>
-                <p>Prescription: {{ prescription }}</p>
-                <p>Top Causes of Mortality:</p>
-                <ul>
-                    {% for cause in top_mortality_causes %}
-                        <li>{{ cause.cause }}: {{ cause.count }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 </div>
 
 {% endblock %}
