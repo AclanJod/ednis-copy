@@ -20,12 +20,14 @@
 <div id="vaccine_counts_dict"style="display: none;">{{ vaccine_counts_dict|safe|default:"[]" }}</div>
 <div id="unvaccinated_counts" style="display: none;">{{ unvaccinated_counts|safe }}</div>
 <div id="vaccine_needed" style="display: none;">{{ vaccine_needed|safe }}</div>
+<div id="pig_sales_monthly_data" style="display: none;">{{ pig_sales_monthly_data|safe }}</div>
 
 
 <div class="d-flex justify-content-around my-2">
     <button id="showPigSalesButton" class="menu_button mx-2" style="width: 70%;">Pig Sales</button>
     <button id="showVaccinationButton" class="menu_button mx-2" style="width: 70%;">Vaccination</button>
     <button id="showFeedsButton" class="menu_button mx-2" style="width: 70%;">Feeds</button>
+    <button id="showWeanlingButton" class="menu_button mx-2" style="width: 70%;">Weanling</button>
     <button id="showMortalityButton" class="menu_button mx-2" style="width: 70%;">Mortality</button>
 </div>
 
@@ -36,7 +38,7 @@
                 <div class="rounded-top" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                        MONTHLY PIG SALES
+                        MONTHLY PIG SALES COUNT
                     </span>
                 </div>
                 <select class="mt-2 ms-2 rounded" id="selectYear"></select>
@@ -62,7 +64,7 @@
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                        PIG SALE WEIGHT AVERAGE
+                        AVERAGE WEIGHT ON PIG SALE 
                     </span>
                 </div>
                 <select class="mt-2 ms-2 rounded" id="selected_year_for_weight"></select>
@@ -74,11 +76,11 @@
                 <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                        WEANLING PROGRESS
+                        MONTHLY SALES CAPITAL GAIN
                     </span>
                 </div>
-                <canvas id="weanlingsProgressBar" width="400" height="100" style="margin: 2%;"></canvas>
-                <p class="m-2">Prescription: {{ weanlings_prescription }}</p>
+                <select class="mt-2 ms-2 rounded" id="selectPigSalesYear"></select>
+                <canvas class="ms-2" id="pigMonthlySalesChart" width="560" height="250"></canvas>
             </div>
         </div>
     </div>
@@ -95,8 +97,7 @@
                     <div class="rounded-top w-100" style="background-color: #ff7b7b;">
                         <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                         <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
-                            NUMBER OF VACCINES
-                        </span>
+                            VACCINATED PER VACCINE</span>
                     </div>
                     <canvas id="vaccine_counts_chart" width="590" height="280"></canvas>
                 </div>
@@ -195,9 +196,10 @@
                 <div class="rounded-top" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/mortality_icon.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 fs-5 text-white fw-bold">
-                        Mortality Rate
+                        MORTALITY RATE
                     </span>
                 </div>
+                <select class="mt-2 ms-2 rounded" id="selectMortalityYear"></select>
                 <canvas class="m-2" id="mortalityAreaChart" width="750%" height="200%"></canvas>
             </div>
         </div>
@@ -206,7 +208,7 @@
                 <div class="rounded-top" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/mortality_icon.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 fs-5 text-white fw-bold">
-                        Mortality Prescription
+                        MORTALITY ASSESMENT
                     </span>
                 </div>
                 <div class="px-3 py-3">
@@ -221,6 +223,23 @@
                         {% endfor %}
                     </ul>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="weanlingSection" style="display: none;">
+    <div class="col-4">
+        <div class="row-1">
+            <div class="graph-container rounded" style="height: 40%; width: 200%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
+                <div class="rounded-top" style="background-color: #ff7b7b;">
+                    <img src="{% static 'img/mortality_icon.png' %}" class="ms-2" style="width: 3%;">
+                    <span class="mx-3 fs-5 text-white fw-bold">
+                        WEANLING PROGRESS
+                    </span>
+                </div>
+                <canvas id="weanlingsProgressBar" width="400" height="100" style="margin: 2%;"></canvas>
+                <p class="m-2">Prescription: {{ weanlings_prescription }}</p>
             </div>
         </div>
     </div>
