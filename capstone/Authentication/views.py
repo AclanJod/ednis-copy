@@ -1278,16 +1278,41 @@ def generate_pdf(request):
         monthly_counts[year_month] += 1
 
     total_pigs = len(pig_data)
-    vaccinated_pigs = Pig.objects.annotate(vaccine_count= (Count('vaccines'))).filter(vaccine_count__gt=0).count()
+    vaccinated_pigs = Pig.objects.annotate(vaccine_count= (Count('vaccines'))).filter(date__range=(start_date, end_date), vaccine_count__gt=0).count()
     percentage_vaccinated = (vaccinated_pigs / total_pigs) * 100
 
     percentage_vaccinated_string = str(percentage_vaccinated)
 
     #generate feed costs monthly
-    feed_expenses = FeedsInventory.objects.filter(date__range=[start_date, end_date]).aggregate(feed_expenses=ExpressionWrapper(Sum('cost'), output_field=DecimalField(max_digits=5, decimal_places=2)))['feed_expenses']
-    # dates = [item['date'].strftime('%Y-%m-%d') for item in feed_expenses]
-    # total_costs = [float(item['total_cost']) for item in feed_expenses]
+    feed_expenses = FeedsInventory.objects.filter(date__range=(start_date, end_date)).aggregate(feed_expenses=ExpressionWrapper(Sum('cost'), output_field=DecimalField(max_digits=5, decimal_places=2)))['feed_expenses']
     feed_expenses_string = str(float(feed_expenses))
+
+    mh_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='MH').count()
+    mh_vaxx_count_string = str(int(mh_vaxx_count))
+
+    hps_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='HPS').count()
+    hps_vaxx_count_string = str(hps_vaxx_count)
+
+    prrs_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='PRRS').count()
+    prrs_vaxx_count_string = str(prrs_vaxx_count)
+    
+    pcv_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='PCV').count()
+    pcv_vaxx_count_string = str(pcv_vaxx_count)
+
+    prv_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='PRV').count()
+    prv_vaxx_count_string = str(prv_vaxx_count)
+
+    hcv1_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='HCV1').count()
+    hcv1_vaxx_count_string = str(hcv1_vaxx_count)
+
+    hcv2_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='HCV2').count()
+    hcv2_vaxx_count_string = str(hcv2_vaxx_count)
+
+    siv_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='SIV').count()
+    siv_vaxx_count_string = str(siv_vaxx_count)
+
+    app_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='APP').count()
+    app_vaxx_count_string = str(app_vaxx_count)
 
     # Create a PDF document
     buffer = BytesIO()
@@ -1306,17 +1331,16 @@ def generate_pdf(request):
     p.drawString(70, 705, (f"- Feeds Expenses for this month is Php {feed_expenses_string}."))
 
     p.drawString(50, 690, "Vaccination")
-    p.drawString(70, 675, (f"- The vaccination rate is at {percentage_vaccinated_string}% ({vaccinated_pigs} out of {total_pigs} pigs)."))
-    p.drawString(100, 660, (f"> blank pigs were vaccinated with MH."))
-    p.drawString(100, 645, (f"> blank pigs were vaccinated with HPS."))
-    p.drawString(100, 630, (f"> blank pigs were vaccinated with PRRS."))
-    p.drawString(100, 615, (f"> blank pigs were vaccinated with PCV."))
-    p.drawString(100, 600, (f"> blank pigs were vaccinated with PRV."))
-    p.drawString(100, 585, (f"> blank pigs were vaccinated with HCV1."))
-    p.drawString(100, 570, (f"> blank pigs were vaccinated with HCV2."))
-    p.drawString(100, 555, (f"> blank pigs were vaccinated with SIV."))
-    p.drawString(100, 540, (f"> blank pigs were vaccinated with APP."))
-    p.drawString(100, 525, (f"> blank pigs were vaccinated with APP."))
+    p.drawString(70, 675, (f"- The vaccination rate this month is at {percentage_vaccinated_string}% ({vaccinated_pigs} out of {total_pigs} pigs)."))
+    p.drawString(100, 660, (f"> {mh_vaxx_count_string} pigs were vaccinated with MH."))
+    p.drawString(100, 645, (f"> {hps_vaxx_count_string} pigs were vaccinated with HPS."))
+    p.drawString(100, 630, (f"> {prrs_vaxx_count_string} pigs were vaccinated with PRRS."))
+    p.drawString(100, 615, (f"> {pcv_vaxx_count_string} pigs were vaccinated with PCV."))
+    p.drawString(100, 600, (f"> {prv_vaxx_count_string} pigs were vaccinated with PRV."))
+    p.drawString(100, 585, (f"> {hcv1_vaxx_count_string} pigs were vaccinated with HCV1."))
+    p.drawString(100, 570, (f"> {hcv2_vaxx_count_string} pigs were vaccinated with HCV2."))
+    p.drawString(100, 555, (f"> {siv_vaxx_count_string} pigs were vaccinated with SIV."))
+    p.drawString(100, 540, (f"> {app_vaxx_count_string} pigs were vaccinated with APP."))
 
     p.drawString(50, 510, (f"Mortality"))
     p.drawString(70, 495, (f"- This month, we've recorded {mort_results_string} mortality"))
@@ -1335,4 +1359,3 @@ def generate_pdf(request):
 
     if request.method == 'POST':
         return response
-  
