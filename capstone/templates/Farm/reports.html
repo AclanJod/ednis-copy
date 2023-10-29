@@ -228,8 +228,8 @@
     </div>
 </div>
 
-<div id="weanlingSection" style="display: none;">
-    <div class="col-4">
+<div id="weanlingSection" style="display: none; height: 100%;">
+    <div class="col-4 d-flex flex-column justify-content-between">
         <div class="row-1">
             <div class="graph-container rounded" style="height: 40%; width: 200%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
                 <div class="rounded-top" style="background-color: #ff7b7b;">
@@ -241,6 +241,14 @@
                 <canvas id="weanlingsProgressBar" width="400" height="100" style="margin: 2%;"></canvas>
                 <p class="m-2">Prescription: {{ weanlings_prescription }}</p>
             </div>
+        </div>
+        <div class="row-1 d-flex flex-row-revers">
+            <form method="post" action="{% url 'generate_pdf' %}">
+                {% csrf_token %}
+                <button class="menu_button" type="submit">
+                    GENERATE PRINTABLE REPORTS
+                </button>
+            </form>
         </div>
     </div>
 </div>

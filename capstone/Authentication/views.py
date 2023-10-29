@@ -19,7 +19,7 @@ from django.db.models import Q
 from django.contrib import messages
 from datetime import date as today_date, timedelta
 from django.db.models.functions import ExtractDay
-from django.db.models import Sum, F
+from django.db.models import Sum, Avg, F, ExpressionWrapper, DecimalField
 from django.utils import timezone
 import pandas as pd
 from barcode import Code128
@@ -29,6 +29,11 @@ from barcode.writer import ImageWriter
 from io import BytesIO
 import base64
 from django.http import HttpResponse
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+import psycopg2
+
 
 def generate_barcode(pig_id):
     # Create a Code128 barcode with the pig_id
@@ -1156,6 +1161,7 @@ def search_sow_suggestions(request):
     return JsonResponse({'suggestions': suggestions})
 
 def get_sow_performance_data(request, pig_id):
+    
     try:
         sow = Sow.objects.get(pk=pig_id)
         sow_performances = SowPerformance.objects.filter(sow_no=sow)
@@ -1234,3 +1240,99 @@ def get_vaccine_data(request, pig_id):
     ]
 
     return JsonResponse({'vaccine_data': vaccine_data})
+
+def generate_pdf(request):
+    end_date = timezone.now()
+    start_date = end_date - timedelta(days=30)
+
+    #generate data you want to add to your pdf file
+
+    #generate the data for mortality
+    mort_results = MortalityForm.objects.filter(date__range=(start_date, end_date)).count()
+    mort_results_string = str(mort_results)
+
+    #generate data for the number of pig sales
+    sales_counts = PigSale.objects.filter(date__range=(start_date, end_date)).count()
+    sales_counts_string = str(int(sales_counts))
+    
+    #generate data for the number of pigs and sows
+    sow_counts = Sow.objects.filter(date__range=(start_date, end_date)).count()
+    pig_counts = Pig.objects.filter(date__range=(start_date, end_date)).count()
+    ps_counts_string = str(int(sow_counts) + int(pig_counts))
+
+    #generate data for average weight of pigs sold
+    average_wt = PigSale.objects.filter(date__range=(start_date, end_date)).aggregate(
+    average_wt=ExpressionWrapper(Avg('weight'), output_field=DecimalField(max_digits=5, decimal_places=2))
+    )['average_wt']
+    ave_wt_string = str(float(average_wt))
+    
+    #generate vaxx rate of pigs
+    pig_data = Pig.objects.all()
+    exclude_q = Q(pigsale__isnull=False) | Q(mortality_forms__isnull=False)
+
+    monthly_counts = defaultdict(int)
+
+    for pig in pig_data:
+        registration_date = pig.dob
+        year_month = registration_date.strftime("%Y-%m")
+        monthly_counts[year_month] += 1
+
+    total_pigs = len(pig_data)
+    vaccinated_pigs = Pig.objects.annotate(vaccine_count= (Count('vaccines'))).filter(vaccine_count__gt=0).count()
+    percentage_vaccinated = (vaccinated_pigs / total_pigs) * 100
+
+    percentage_vaccinated_string = str(percentage_vaccinated)
+
+    #generate feed costs monthly
+    feed_expenses = FeedsInventory.objects.filter(date__range=[start_date, end_date]).aggregate(feed_expenses=ExpressionWrapper(Sum('cost'), output_field=DecimalField(max_digits=5, decimal_places=2)))['feed_expenses']
+    # dates = [item['date'].strftime('%Y-%m-%d') for item in feed_expenses]
+    # total_costs = [float(item['total_cost']) for item in feed_expenses]
+    feed_expenses_string = str(float(feed_expenses))
+
+    # Create a PDF document
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer)
+
+    # Add content to the PDF
+    title = "GOODWILL FARM REPORTS"
+    
+    p.drawString(200, 800, title)
+    p.drawString(50, 780, "Pig Sales")
+    p.drawString(70, 765, (f"- This month we've sold {sales_counts_string} pigs."))
+    p.drawString(70, 750, (f"- This month we've registered {ps_counts_string} pigs and sows."))
+    p.drawString(70, 735, (f"- This is the general weight average of pigs sold this month is {ave_wt_string}"))
+
+    p.drawString(50, 720, "Feeds")
+    p.drawString(70, 705, (f"- Feeds Expenses for this month is Php {feed_expenses_string}."))
+
+    p.drawString(50, 690, "Vaccination")
+    p.drawString(70, 675, (f"- The vaccination rate is at {percentage_vaccinated_string}% ({vaccinated_pigs} out of {total_pigs} pigs)."))
+    p.drawString(100, 660, (f"> blank pigs were vaccinated with MH."))
+    p.drawString(100, 645, (f"> blank pigs were vaccinated with HPS."))
+    p.drawString(100, 630, (f"> blank pigs were vaccinated with PRRS."))
+    p.drawString(100, 615, (f"> blank pigs were vaccinated with PCV."))
+    p.drawString(100, 600, (f"> blank pigs were vaccinated with PRV."))
+    p.drawString(100, 585, (f"> blank pigs were vaccinated with HCV1."))
+    p.drawString(100, 570, (f"> blank pigs were vaccinated with HCV2."))
+    p.drawString(100, 555, (f"> blank pigs were vaccinated with SIV."))
+    p.drawString(100, 540, (f"> blank pigs were vaccinated with APP."))
+    p.drawString(100, 525, (f"> blank pigs were vaccinated with APP."))
+
+    p.drawString(50, 510, (f"Mortality"))
+    p.drawString(70, 495, (f"- This month, we've recorded {mort_results_string} mortality"))
+
+    # Finish the PDF and close the canvas
+    p.showPage()
+    p.save()
+
+    pdf_data = buffer.getvalue()
+    buffer.close()
+
+    # create response obj with appropriate content for pdf
+    response = HttpResponse(request, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reports.pdf"'
+    response.write(pdf_data)
+
+    if request.method == 'POST':
+        return response
+  

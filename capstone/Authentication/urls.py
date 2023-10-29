@@ -35,4 +35,5 @@ urlpatterns = [
     path('get_sow_performance_data/<int:pig_id>/', views.get_sow_performance_data, name='get_sow_performance_data'),
     path('archive_user/<int:user_id>/', views.archive_user, name='archive_user'),
     path('get_vaccine_data/<str:pig_id>/', views.get_vaccine_data, name='get_vaccine_data'),
+    path('generate_pdf/', views.generate_pdf, name='generate_pdf'),
 ]
