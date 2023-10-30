@@ -135,43 +135,43 @@
     </div>
     <div class="row mt-2">
         <div class="col-3">
-            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;background-color:#BC4749;">
                 <div class="mt-2 mx-2">
-                    <p>Total Suckling Count: {{ pig_list_28_days}}</p>
-                    <p>Total Feed Needed: {{total_feed_suckling_formatted}} kilos</p>
-                    <p>Total Feed Available: {{ difference_booster }} kilos</p>
-                    <p>Feeds Deficit: {{ total_feed_suckling_deficit_formatted }} kilos which cost  ₱{{ total_feed_suckling_cost_formatted }}</p>
+                    <p class="text-white">Total Suckling Count: {{ pig_list_28_days}}</p>
+                    <p class="text-white">Total Feed Needed: {{total_feed_suckling_formatted}} kilos</p>
+                    <p class="text-white">Total Feed Available: {{ difference_booster }} kilos</p>
+                    <p class="text-white">Feeds Deficit: {{ total_feed_suckling_deficit_formatted }} kilos which cost  ₱{{ total_feed_suckling_cost_formatted }}</p>
                 </div>
             </div>
         </div>
         <div class="col-3">
-            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll; background-color:#F75555;">
                 <div class="mt-2 mx-2">
-                    <p>Total Weanling Count: {{ pig_list_28_to_88_days}}</p>
-                    <p>Total Feed Needed: {{ total_feed_weanling_formatted }} kilos</p>
-                    <p>Total Feed Available: {{difference_pre_starter }} kilos</p>
-                    <p>Feeds Deficit: {{total_feed_weanling_deficit_formatted }} kilos which cost  ₱{{ total_feed_weanling_cost_formatted}}</p>
+                    <p class="text-white">Total Weanling Count: {{ pig_list_28_to_88_days}}</p>
+                    <p class="text-white">Total Feed Needed: {{ total_feed_weanling_formatted }} kilos</p>
+                    <p class="text-white">Total Feed Available: {{difference_pre_starter }} kilos</p>
+                    <p class="text-white">Feeds Deficit: {{total_feed_weanling_deficit_formatted }} kilos which cost  ₱{{ total_feed_weanling_cost_formatted}}</p>
                 </div>
             </div>
         </div>
         <div class="col-3">
-            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll; background-color:#F8B9B9;">
                 <div class="mt-2 mx-2">
-                    <p>Total Grower Count: {{ pig_list_88_to_148_days}}</p>
-                    <p>Total Feed Needed: {{ total_feed_grower_formatted }} kilos</p>
-                    <p>Total Feed Available: {{ difference_starter }} kilos</p>
-                    <p>Feeds Deficit: {{ total_feed_grower_deficit_formatted }} kilos which cost  ₱{{ total_feed_grower_cost_formatted}}</p>
-                    <p>Total Feed Cost: {{ total_feed_grower_deficit_formatted }}</p>
+                    <p class="text-white">Total Grower Count: {{ pig_list_88_to_148_days}}</p>
+                    <p class="text-white">Total Feed Needed: {{ total_feed_grower_formatted }} kilos</p>
+                    <p class="text-white">Total Feed Available: {{ difference_starter }} kilos</p>
+                    <p class="text-white">Feeds Deficit: {{ total_feed_grower_deficit_formatted }} kilos which cost  ₱{{ total_feed_grower_cost_formatted}}</p>
+                    <p class="text-white">Total Feed Cost: {{ total_feed_grower_deficit_formatted }}</p>
                 </div>
             </div>
         </div>
         <div class="col-3">
-            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+            <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll; background-color:#9c7575;">
                 <div class="mt-2 mx-2">
-                    <p>Total Pig Count: {{pig_list_greater_than_148_days }}</p>
-                    <p>Total Fattener Needed: {{ total_feed_fattener_formatted}} kilos</p>
-                    <p>Total Feed Available: {{ difference_grower }} kilos</p>
-                    <p>Feeds Deficit: {{ total_feed_fattener_deficit_formatted }} kilos which cost  ₱{{total_feed_fattener_cost_formatted}}</p>
+                    <p class="text-white">Total Pig Count: {{pig_list_greater_than_148_days }}</p>
+                    <p class="text-white">Total Fattener Needed: {{ total_feed_fattener_formatted}} kilos</p>
+                    <p class="text-white">Total Feed Available: {{ difference_grower }} kilos</p>
+                    <p class="text-white">Feeds Deficit: {{ total_feed_fattener_deficit_formatted }} kilos which cost  ₱{{total_feed_fattener_cost_formatted}}</p>
                 </div>
             </div>
         </div>
@@ -242,12 +242,36 @@
                 <p class="m-2">Prescription: {{ weanlings_prescription }}</p>
             </div>
         </div>
-        <div class="row-1 d-flex flex-row-revers">
-            <form method="post" action="{% url 'generate_pdf' %}">
+        <div class="row-1 d-flex flex-row gap-2 justify-content-between" style="width: 300%; transform: translateY(1000%);">
+            <form method="post" action="{% url 'generate_sales_report' %}">
                 {% csrf_token %}
-                <button class="menu_button" type="submit">
-                    GENERATE PRINTABLE REPORTS
-                </button>
+                    <button class="menu_button" type="submit">
+                        GENERATE SALES REPORTS
+                    </button>
+            </form>
+            <form method="post" action="{% url 'generate_mortality_report' %}">
+                {% csrf_token %}
+                    <button class="menu_button" type="submit">
+                        GENERATE MORTALITY REPORTS
+                    </button>
+            </form>
+            <form method="post" action="{% url 'generate_weanling_report' %}">
+                {% csrf_token %}
+                    <button class="menu_button" type="submit">
+                        GENERATE WEANLING REPORTS
+                    </button>
+            </form>
+            <form method="post" action="{% url 'generate_vaxx_report' %}">
+                {% csrf_token %}
+                    <button class="menu_button" type="submit">
+                        GENERATE VACCINATION REPORTS
+                    </button>
+            </form>
+            <form method="post" action="{% url 'generate_feed_report' %}">
+                {% csrf_token %}
+                    <button class="menu_button" type="submit">
+                        GENERATE FEEDS REPORTS
+                    </button>
             </form>
         </div>
     </div>

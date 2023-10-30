@@ -19,7 +19,7 @@ from django.db.models import Q
 from django.contrib import messages
 from datetime import date as today_date, timedelta
 from django.db.models.functions import ExtractDay
-from django.db.models import Sum, Avg, F, ExpressionWrapper, DecimalField
+from django.db.models import Sum, Avg, F, ExpressionWrapper, DecimalField, Max
 from django.utils import timezone
 import pandas as pd
 from barcode import Code128
@@ -32,8 +32,13 @@ from django.http import HttpResponse
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-import psycopg2
-
+from reportlab.platypus import SimpleDocTemplate, TableStyle, Paragraph, Spacer
+from reportlab.platypus.tables import Table
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from statistics import mean
+from decimal import *
+from itertools import chain
 
 def generate_barcode(pig_id):
     # Create a Code128 barcode with the pig_id
@@ -1240,122 +1245,417 @@ def get_vaccine_data(request, pig_id):
     ]
 
     return JsonResponse({'vaccine_data': vaccine_data})
-
-def generate_pdf(request):
-    end_date = timezone.now()
-    start_date = end_date - timedelta(days=30)
-
-    #generate data you want to add to your pdf file
-
-    #generate the data for mortality
-    mort_results = MortalityForm.objects.filter(date__range=(start_date, end_date)).count()
-    mort_results_string = str(mort_results)
-
-    #generate data for the number of pig sales
-    sales_counts = PigSale.objects.filter(date__range=(start_date, end_date)).count()
-    sales_counts_string = str(int(sales_counts))
     
-    #generate data for the number of pigs and sows
-    sow_counts = Sow.objects.filter(date__range=(start_date, end_date)).count()
-    pig_counts = Pig.objects.filter(date__range=(start_date, end_date)).count()
-    ps_counts_string = str(int(sow_counts) + int(pig_counts))
+def generate_sales_report(request):
+    # Get the current month and year
+    current_month = datetime.now()
 
-    #generate data for average weight of pigs sold
-    average_wt = PigSale.objects.filter(date__range=(start_date, end_date)).aggregate(
-    average_wt=ExpressionWrapper(Avg('weight'), output_field=DecimalField(max_digits=5, decimal_places=2))
-    )['average_wt']
-    ave_wt_string = str(float(average_wt))
-    
-    #generate vaxx rate of pigs
-    pig_data = Pig.objects.all()
-    exclude_q = Q(pigsale__isnull=False) | Q(mortality_forms__isnull=False)
+    # Filter PigSales for the current month
+    sales_data = PigSale.objects.filter(date__year=current_month.year, date__month=current_month.month)
 
-    monthly_counts = defaultdict(int)
-
-    for pig in pig_data:
-        registration_date = pig.dob
-        year_month = registration_date.strftime("%Y-%m")
-        monthly_counts[year_month] += 1
-
-    total_pigs = len(pig_data)
-    vaccinated_pigs = Pig.objects.annotate(vaccine_count= (Count('vaccines'))).filter(date__range=(start_date, end_date), vaccine_count__gt=0).count()
-    percentage_vaccinated = (vaccinated_pigs / total_pigs) * 100
-
-    percentage_vaccinated_string = str(percentage_vaccinated)
-
-    #generate feed costs monthly
-    feed_expenses = FeedsInventory.objects.filter(date__range=(start_date, end_date)).aggregate(feed_expenses=ExpressionWrapper(Sum('cost'), output_field=DecimalField(max_digits=5, decimal_places=2)))['feed_expenses']
-    feed_expenses_string = str(float(feed_expenses))
-
-    mh_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='MH').count()
-    mh_vaxx_count_string = str(int(mh_vaxx_count))
-
-    hps_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='HPS').count()
-    hps_vaxx_count_string = str(hps_vaxx_count)
-
-    prrs_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='PRRS').count()
-    prrs_vaxx_count_string = str(prrs_vaxx_count)
-    
-    pcv_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='PCV').count()
-    pcv_vaxx_count_string = str(pcv_vaxx_count)
-
-    prv_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='PRV').count()
-    prv_vaxx_count_string = str(prv_vaxx_count)
-
-    hcv1_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='HCV1').count()
-    hcv1_vaxx_count_string = str(hcv1_vaxx_count)
-
-    hcv2_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='HCV2').count()
-    hcv2_vaxx_count_string = str(hcv2_vaxx_count)
-
-    siv_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='SIV').count()
-    siv_vaxx_count_string = str(siv_vaxx_count)
-
-    app_vaxx_count = Vaccine.objects.filter(date__range=(start_date, end_date), vaccine='APP').count()
-    app_vaxx_count_string = str(app_vaxx_count)
-
-    # Create a PDF document
+    # Create a buffer for the PDF
     buffer = BytesIO()
-    p = canvas.Canvas(buffer)
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
 
-    # Add content to the PDF
-    title = "GOODWILL FARM REPORTS"
+    elements = []
+
+    # Create a custom title style
+    title_style = ParagraphStyle(
+        name='CustomTitleStyle',
+        fontSize=14,
+        textColor='black',  # Change the title text color
+        alignment=1,  # Center alignment
+    )
+    styles = getSampleStyleSheet()["Heading3"]
+    heading = getSampleStyleSheet()["Heading2"]
+
+    # Create a title for the report using the custom style
+    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+    elements.append(Paragraph("Sales Report for " + current_month.strftime('%Y-%m'), style=title_style))
+    elements.append(Spacer(1, 12))
+
+    # Define the data for the table
+    table_data = [['Pig ID', 'Weight', 'Price', 'Date']]
+
+    total_sales = Decimal(0)
+    total_count = 0
+    weights = []
+
+    for sale in sales_data:
+        table_data.append([sale.pig.pig_id, sale.weight, sale.price, sale.date])
+        total_sales += sale.price
+        total_count += 1
+        weights.append(sale.weight)
+
+    average_weight = mean(weights) if weights else 0
     
-    p.drawString(200, 800, title)
-    p.drawString(50, 780, "Pig Sales")
-    p.drawString(70, 765, (f"- This month we've sold {sales_counts_string} pigs."))
-    p.drawString(70, 750, (f"- This month we've registered {ps_counts_string} pigs and sows."))
-    p.drawString(70, 735, (f"- This is the general weight average of pigs sold this month is {ave_wt_string}"))
+    # Add a summary section
+    elements.append(Paragraph("Total Sales: Php %.2f" % total_sales, style=styles))
+    elements.append(Paragraph("Total Count: %d" % total_count, style=styles))
+    elements.append(Paragraph("Average Weight: %.2f" % average_weight, style=styles))
 
-    p.drawString(50, 720, "Feeds")
-    p.drawString(70, 705, (f"- Feeds Expenses for this month is Php {feed_expenses_string}."))
+    # Create a table
+    table = Table(table_data, colWidths=120, rowHeights=30)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.white),
+    ]))
 
-    p.drawString(50, 690, "Vaccination")
-    p.drawString(70, 675, (f"- The vaccination rate this month is at {percentage_vaccinated_string}% ({vaccinated_pigs} out of {total_pigs} pigs)."))
-    p.drawString(100, 660, (f"> {mh_vaxx_count_string} pigs were vaccinated with MH."))
-    p.drawString(100, 645, (f"> {hps_vaxx_count_string} pigs were vaccinated with HPS."))
-    p.drawString(100, 630, (f"> {prrs_vaxx_count_string} pigs were vaccinated with PRRS."))
-    p.drawString(100, 615, (f"> {pcv_vaxx_count_string} pigs were vaccinated with PCV."))
-    p.drawString(100, 600, (f"> {prv_vaxx_count_string} pigs were vaccinated with PRV."))
-    p.drawString(100, 585, (f"> {hcv1_vaxx_count_string} pigs were vaccinated with HCV1."))
-    p.drawString(100, 570, (f"> {hcv2_vaxx_count_string} pigs were vaccinated with HCV2."))
-    p.drawString(100, 555, (f"> {siv_vaxx_count_string} pigs were vaccinated with SIV."))
-    p.drawString(100, 540, (f"> {app_vaxx_count_string} pigs were vaccinated with APP."))
+    elements.append(table)
+    elements.append(Spacer(1, 12))
 
-    p.drawString(50, 510, (f"Mortality"))
-    p.drawString(70, 495, (f"- This month, we've recorded {mort_results_string} mortality"))
+    # Build the PDF document
+    doc.build(elements)
+    buffer.seek(0)
 
-    # Finish the PDF and close the canvas
-    p.showPage()
-    p.save()
+    # Create a response with the PDF file
+    response = FileResponse(buffer, as_attachment=True, filename="sales_report.pdf")
 
-    pdf_data = buffer.getvalue()
-    buffer.close()
+    if request.method == 'POST':
+        return response
 
-    # create response obj with appropriate content for pdf
-    response = HttpResponse(request, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="reports.pdf"'
-    response.write(pdf_data)
+def generate_mortality_report(request):
+    # Get the current month and year
+    current_month = datetime.now()
+
+    # Filter PigSales for the current month
+    moratlity_data = MortalityForm.objects.filter(date__year=current_month.year, date__month=current_month.month)
+
+    # Create a buffer for the PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+    elements = []
+
+    # Create a custom title style
+    title_style = ParagraphStyle(
+        name='CustomTitleStyle',
+        fontSize=14,
+        textColor='black',  # Change the title text color
+        alignment=1,  # Center alignment
+    )
+    styles = getSampleStyleSheet()["Heading3"]
+    heading = getSampleStyleSheet()["Heading2"]
+
+    # Create a title for the report using the custom style
+    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+    elements.append(Paragraph("Mortality Report for " + current_month.strftime('%Y-%B'), style=title_style))
+    elements.append(Spacer(1, 12))
+
+    # Define the data for the table
+    table_data = [['', 'Pig ID', 'Cause', 'Location', 'Date']]
+
+    total_mortality = 0
+    top_cause = MortalityForm.objects.aggregate(max_value=Max('cause'))['max_value']
+    
+    for mortality in moratlity_data:
+        table_data.append([mortality.id, mortality.pig_id, mortality.cause, mortality.location, mortality.date])
+        total_mortality += 1
+
+    # Add a summary section
+    elements.append(Paragraph("Total Mortality: %d" % total_mortality, style=styles))
+    elements.append(Paragraph("Top Cause: %s" % top_cause, style=styles))
+
+    # Create a table
+    table = Table(table_data, colWidths=100, rowHeights=30)
+    table.setStyle(TableStyle([
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.white),
+    ]))
+
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # Build the PDF document
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Create a response with the PDF file
+    response = FileResponse(buffer, as_attachment=True, filename="mortality_report.pdf")
+
+    if request.method == 'POST':
+        return response
+    
+def generate_weanling_report(request):
+    # Get the current month and year
+    current_month = datetime.now()
+
+    weanling_data = Weanling.objects.filter(date__year=current_month.year, date__month=current_month.month)
+    recent_pigs = Pig.objects.filter(date__year=current_month.year, date__month=current_month.month)
+    recent_pigs_total = len(recent_pigs)
+     # Create a buffer for the PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+    total_weanling_count = 0
+    elements = []
+
+    # Create a custom title style
+    title_style = ParagraphStyle(
+        name='CustomTitleStyle',
+        fontSize=14,
+        textColor='black',  # Change the title text color
+        alignment=1,  # Center alignment
+    )
+    styles = getSampleStyleSheet()["Heading3"]
+    heading = getSampleStyleSheet()["Heading2"]
+
+    # Create a title for the report using the custom style
+    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+    elements.append(Paragraph("Vaccine Report for " + current_month.strftime('%Y-%B'), style=title_style))
+    elements.append(Spacer(1, 12))
+
+    # Define the data for the table
+    table_data = [['', 'Pig ID', 'Date']]
+
+    for weanlings in weanling_data:
+        table_data.append([weanlings.id, weanlings.pig_id, weanlings.date])
+        total_weanling_count += 1
+
+    wean_pct = (total_weanling_count / recent_pigs_total) *100
+
+    elements.append(Paragraph("Total Weanling Count: %d" % total_weanling_count, style=styles))
+    elements.append(Paragraph("Total Percentage: %d" % wean_pct + "%", style=styles))
+
+     # Create a table
+    table = Table(table_data, colWidths=130, rowHeights=30)
+    table.setStyle(TableStyle([
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.white),
+    ]))
+
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # Build the PDF document
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Create a response with the PDF file
+    response = FileResponse(buffer, as_attachment=True, filename="weanling_report.pdf")
+
+    if request.method == 'POST':
+        return response
+       
+def generate_vaxx_report(request):
+    # Get the current month and year
+    current_month = datetime.now()
+
+    pig_data = Pig.objects.filter(date__year=current_month.year, date__month=current_month.month)
+    total_pigs = len(pig_data)
+    mh_count = "MH"
+    mh_vaxx = Vaccine.objects.filter(vaccine = mh_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    mh_pct = 100 * (mh_vaxx / total_pigs)
+    hps_count = "HPS"
+    hps_vaxx = Vaccine.objects.filter(vaccine = hps_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    hps_pct = 100 * (hps_vaxx / total_pigs)
+    prrs_count = "PRRS"
+    prrs_vaxx = Vaccine.objects.filter(vaccine = prrs_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    prrs_pct = 100 * (prrs_vaxx / total_pigs)
+    pcv_count = "PCV"
+    pcv_vaxx = Vaccine.objects.filter(vaccine = pcv_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    pcv_pct = 100 * (pcv_vaxx / total_pigs)
+    prv_count = "PRV"
+    prv_vaxx = Vaccine.objects.filter(vaccine = prv_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    prv_pct = 100 * (prv_vaxx / total_pigs)
+    hcv1_count = "HCV1"
+    hcv1_vaxx = Vaccine.objects.filter(vaccine = hcv1_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    hcv1_pct = 100 * (hcv1_vaxx / total_pigs)
+    hcv2_count = "HCV2"
+    hcv2_vaxx = Vaccine.objects.filter(vaccine = hcv2_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    hcv2_pct = 100 * (hcv2_vaxx / total_pigs)
+    siv_count = "SIV"
+    siv_vaxx = Vaccine.objects.filter(vaccine = siv_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    siv_pct = 100 * (siv_vaxx / total_pigs)
+    app_count = "APP"
+    app_vaxx = Vaccine.objects.filter(vaccine = app_count).filter(date__year=current_month.year, date__month=current_month.month).count()
+    app_pct = 100 * (mh_vaxx / total_pigs)
+
+    # Create a buffer for the PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+    elements = []
+
+    # Create a custom title style
+    title_style = ParagraphStyle(
+        name='CustomTitleStyle',
+        fontSize=14,
+        textColor='black',  # Change the title text color
+        alignment=1,  # Center alignment
+    )
+    styles = getSampleStyleSheet()["Heading3"]
+    heading = getSampleStyleSheet()["Heading2"]
+
+    # Create a title for the report using the custom style
+    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+    elements.append(Paragraph("Vaccine Report for " + current_month.strftime('%Y-%B'), style=title_style))
+    elements.append(Spacer(1, 12))
+
+    # Define the data for the table
+    table_data = [['Vaccine', 'Vaccinated Pigs', 'Percentage']]
+
+    table_data.append(["MH", mh_vaxx, "%.2f" % mh_pct + "%"])
+    table_data.append(["HPS", hps_vaxx, "%.2f" % hps_pct + "%"])
+    table_data.append(["PRRS", prrs_vaxx, "%.2f" % prrs_pct + "%"])
+    table_data.append(["PCV", pcv_vaxx, "%.2f" % pcv_pct + "%"])
+    table_data.append(["PRV", prv_vaxx, "%.2f" % prv_pct + "%"])
+    table_data.append(["HCV1", hcv1_vaxx, "%.2f" % hcv1_pct + "%"])
+    table_data.append(["HCV2", hcv2_vaxx, "%.2f" % hcv2_pct + "%"])
+    table_data.append(["SIV", siv_vaxx, "%.2f" % siv_pct + "%"])
+    table_data.append(["APP", app_vaxx, "%.2f" % app_pct + "%"])
+
+    # Create a table
+    table = Table(table_data, colWidths=130, rowHeights=30)
+    table.setStyle(TableStyle([
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.white),
+    ]))
+
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # Build the PDF document
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Create a response with the PDF file
+    response = FileResponse(buffer, as_attachment=True, filename="vaxx_report.pdf")
+
+    if request.method == 'POST':
+        return response
+    
+def generate_feed_report(request):
+    # Get the current month and year
+    current_month = datetime.now()
+
+    exclude_q = Q(pigsale__isnull=False) | Q(mortality_forms__isnull=False)
+    twenty_eight_days_ago = date.today() - timedelta(days=28)
+    eighty_eight_days_ago = date.today() - timedelta(days=88)
+    one_forty_eight_days_ago = date.today() - timedelta(days=148)
+    pig_list_28_days = Pig.objects.filter(dob__gte=twenty_eight_days_ago, date__year=current_month.year, date__month=current_month.month).exclude(exclude_q).count() 
+    pig_list_28_to_88_days = Pig.objects.filter(dob__gte=eighty_eight_days_ago, dob__lt=twenty_eight_days_ago, date__year=current_month.year, date__month=current_month.month).exclude(exclude_q).count() 
+    pig_list_88_to_148_days = Pig.objects.filter(dob__gte=one_forty_eight_days_ago, dob__lt=eighty_eight_days_ago, date__year=current_month.year, date__month=current_month.month).exclude(exclude_q).count() 
+    pig_list_greater_than_148_days = Pig.objects.filter(dob__lt=one_forty_eight_days_ago, date__year=current_month.year, date__month=current_month.month).exclude(exclude_q).count() 
+
+    # For Booster
+    booster_option = "Booster"
+    feed_stock_updates_booster = FeedStockUpdate.objects.filter(ration=booster_option)
+    total_quantity_booster = FeedsInventory.objects.filter(feeds_ration=booster_option).aggregate(Sum('quantity'))['quantity__sum']
+    total_quantity_booster = total_quantity_booster or 0
+    # For Starter
+    starter_option = "Starter"
+    feed_stock_updates_starter = FeedStockUpdate.objects.filter(ration=starter_option)
+    total_quantity_starter = FeedsInventory.objects.filter(feeds_ration=starter_option).aggregate(Sum('quantity'))['quantity__sum']
+    total_quantity_starter = total_quantity_starter or 0
+    # For Pre-Starter
+    pre_starter_option = "Pre-Starter"
+    feed_stock_updates_pre_starter = FeedStockUpdate.objects.filter(ration=pre_starter_option)
+    total_quantity_pre_starter = FeedsInventory.objects.filter(feeds_ration=pre_starter_option).aggregate(Sum('quantity'))['quantity__sum']
+    total_quantity_pre_starter = total_quantity_pre_starter or 0
+    # For Grower
+    grower_option = "Grower"
+    feed_stock_updates_grower = FeedStockUpdate.objects.filter(ration=grower_option)
+    total_quantity_grower = FeedsInventory.objects.filter(feeds_ration=grower_option).aggregate(Sum('quantity'))['quantity__sum']
+    total_quantity_grower = total_quantity_grower or 0
+
+    # Calculate the differences based on the specific ration options
+    difference_booster = (total_quantity_booster - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_booster)) * 25
+    difference_starter = (total_quantity_starter - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_starter))* 25
+    difference_pre_starter = (total_quantity_pre_starter - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_pre_starter))* 25
+    difference_grower = total_quantity_grower - sum(feed_stock_update.count_update for feed_stock_update in feed_stock_updates_grower)* 25
+
+    consumption_rate_suckling = 1.5
+    consumption_rate_weanlings = 2.5
+    consumption_rate_grower= 4
+    consumption_rate_fattener= 6
+
+    total_pigs_for_feeds= Pig.objects.exclude(exclude_q).count() 
+    total_feed_needed_suckling = pig_list_28_days * consumption_rate_suckling * 30 
+    total_feed_needed_weanling = pig_list_28_to_88_days * consumption_rate_weanlings*30
+    total_feed_needed_grower = pig_list_88_to_148_days * consumption_rate_grower*30
+    total_feed_needed_fattener = pig_list_greater_than_148_days * consumption_rate_fattener*30
+
+    # You can round the result or format it as needed
+    total_feed_suckling_formatted = "{:.2f}".format(total_feed_needed_suckling )
+    total_feed_weanling_formatted = "{:.2f}".format(total_feed_needed_weanling )
+    total_feed_grower_formatted = "{:.2f}".format(total_feed_needed_grower )
+    total_feed_fattener_formatted = "{:.2f}".format(total_feed_needed_fattener)
+
+    # Create a buffer for the PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+
+    elements = []
+
+    # Create a custom title style
+    title_style = ParagraphStyle(
+        name='CustomTitleStyle',
+        fontSize=14,
+        textColor='black',  # Change the title text color
+        alignment=1,  # Center alignment
+    )
+    styles = getSampleStyleSheet()["Heading3"]
+    heading = getSampleStyleSheet()["Heading2"]
+
+    # Create a title for the report using the custom style
+    elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
+    elements.append(Paragraph("Feeds Report for " + current_month.strftime('%Y-%B'), style=title_style))
+    elements.append(Spacer(1, 12))
+
+    # Define the data for the table
+    table_data = [['Ration Type', 'Initial Quantity', 'Consumption', 'Available Stocks']]
+
+    table_data.append(["Booster", total_quantity_booster, total_feed_needed_suckling, difference_booster])
+    table_data.append(["Pre Starter", total_quantity_pre_starter, total_feed_needed_weanling, difference_pre_starter])
+    table_data.append(["Starter", total_quantity_starter, total_feed_needed_grower, difference_starter])
+    table_data.append(["Grower", total_quantity_grower, total_feed_needed_fattener, difference_grower])
+
+    # Create a table
+    table = Table(table_data, colWidths=130, rowHeights=30)
+    table.setStyle(TableStyle([
+        ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.white),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.white),
+    ]))
+
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # Build the PDF document
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Create a response with the PDF file
+    response = FileResponse(buffer, as_attachment=True, filename="vaxx_report.pdf")
 
     if request.method == 'POST':
         return response
