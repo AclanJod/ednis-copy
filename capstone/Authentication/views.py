@@ -266,7 +266,11 @@ def reports(request, user_type):
     current_year_month = date.today().strftime("%Y-%m")
     current_month_mortality_count = monthly_mortality_counts[current_year_month]
     current_month_pig_count = monthly_counts[current_year_month]
-    average_monthly_mortality_rate = (current_month_mortality_count /current_month_pig_count) * 100
+    average_monthly_mortality_rate = 0
+    if current_month_pig_count != 0:
+        average_monthly_mortality_rate += (current_month_mortality_count /current_month_pig_count) * 100
+    else:
+        messages.info(request, "no pigs registered for this month")
     # Count the number of vaccinated pigs
     vaccinated_pigs = Pig.objects.annotate(vaccine_count=Count('vaccines')).filter(vaccine_count__gt=0).count()
 
@@ -1271,7 +1275,7 @@ def generate_sales_report(request):
 
     # Create a title for the report using the custom style
     elements.append(Paragraph("GOODWILL AGRO INDUSTRIAL DEVELOPMENT CORPORATION", style=heading))
-    elements.append(Paragraph("Sales Report for " + current_month.strftime('%Y-%m'), style=title_style))
+    elements.append(Paragraph("Sales Report for " + current_month.strftime('%Y-%B'), style=title_style))
     elements.append(Spacer(1, 12))
 
     # Define the data for the table
@@ -1422,8 +1426,12 @@ def generate_weanling_report(request):
     for weanlings in weanling_data:
         table_data.append([weanlings.id, weanlings.pig_id, weanlings.date])
         total_weanling_count += 1
-
-    wean_pct = (total_weanling_count / recent_pigs_total) *100
+    
+    wean_pct = 0
+    if recent_pigs_total != 0:
+        wean_pct += (total_weanling_count / recent_pigs_total) *100
+    else:
+        messages.info(request, "No pigs to wean yet")
 
     elements.append(Paragraph("Total Weanling Count: %d" % total_weanling_count, style=styles))
     elements.append(Paragraph("Total Percentage: %d" % wean_pct + "%", style=styles))
@@ -1462,31 +1470,67 @@ def generate_vaxx_report(request):
     total_pigs = len(pig_data)
     mh_count = "MH"
     mh_vaxx = Vaccine.objects.filter(vaccine = mh_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    mh_pct = 100 * (mh_vaxx / total_pigs)
+    mh_pct = 0
+    if total_pigs != 0:
+        mh_pct += 100 * (mh_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
     hps_count = "HPS"
     hps_vaxx = Vaccine.objects.filter(vaccine = hps_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    hps_pct = 100 * (hps_vaxx / total_pigs)
+    hps_pct = 0
+    if total_pigs != 0:
+        hps_pct += 100 * (hps_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
     prrs_count = "PRRS"
     prrs_vaxx = Vaccine.objects.filter(vaccine = prrs_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    prrs_pct = 100 * (prrs_vaxx / total_pigs)
+    prrs_pct = 0
+    if total_pigs != 0:
+        prrs_pct += 100 * (prrs_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
     pcv_count = "PCV"
     pcv_vaxx = Vaccine.objects.filter(vaccine = pcv_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    pcv_pct = 100 * (pcv_vaxx / total_pigs)
+    pcv_pct = 0
+    if total_pigs != 0:
+        pcv_pct += 100 * (pcv_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
     prv_count = "PRV"
     prv_vaxx = Vaccine.objects.filter(vaccine = prv_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    prv_pct = 100 * (prv_vaxx / total_pigs)
+    prv_pct = 0
+    if total_pigs != 0:
+        prv_pct += 100 * (prv_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
     hcv1_count = "HCV1"
     hcv1_vaxx = Vaccine.objects.filter(vaccine = hcv1_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    hcv1_pct = 100 * (hcv1_vaxx / total_pigs)
+    hcv1_pct = 0
+    if total_pigs != 0:
+        hcv1_pct += 100 * (hcv1_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
     hcv2_count = "HCV2"
     hcv2_vaxx = Vaccine.objects.filter(vaccine = hcv2_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    hcv2_pct = 100 * (hcv2_vaxx / total_pigs)
+    hcv2_pct = 0
+    if total_pigs != 0:
+        hcv2_pct += 100 * (hcv2_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
     siv_count = "SIV"
     siv_vaxx = Vaccine.objects.filter(vaccine = siv_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    siv_pct = 100 * (siv_vaxx / total_pigs)
+    siv_pct = 0
+    if total_pigs != 0:
+        siv_pct += 100 * (siv_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
     app_count = "APP"
     app_vaxx = Vaccine.objects.filter(vaccine = app_count).filter(date__year=current_month.year, date__month=current_month.month).count()
-    app_pct = 100 * (mh_vaxx / total_pigs)
+    app_pct = 0
+    if total_pigs != 0:
+        app_pct += 100 * (mh_vaxx / total_pigs)
+    else: 
+        messages.info(request, "No Pigs Registered this Month yet")
 
     # Create a buffer for the PDF
     buffer = BytesIO()
@@ -1655,7 +1699,7 @@ def generate_feed_report(request):
     buffer.seek(0)
 
     # Create a response with the PDF file
-    response = FileResponse(buffer, as_attachment=True, filename="vaxx_report.pdf")
+    response = FileResponse(buffer, as_attachment=True, filename="feeds_report.pdf")
 
     if request.method == 'POST':
         return response

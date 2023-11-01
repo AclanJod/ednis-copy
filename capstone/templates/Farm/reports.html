@@ -22,14 +22,52 @@
 <div id="vaccine_needed" style="display: none;">{{ vaccine_needed|safe }}</div>
 <div id="pig_sales_monthly_data" style="display: none;">{{ pig_sales_monthly_data|safe }}</div>
 
-
-<div class="d-flex justify-content-around my-2">
-    <button id="showPigSalesButton" class="menu_button mx-2" style="width: 70%;">Pig Sales</button>
-    <button id="showVaccinationButton" class="menu_button mx-2" style="width: 70%;">Vaccination</button>
-    <button id="showFeedsButton" class="menu_button mx-2" style="width: 70%;">Feeds</button>
-    <button id="showWeanlingButton" class="menu_button mx-2" style="width: 70%;">Weanling</button>
-    <button id="showMortalityButton" class="menu_button mx-2" style="width: 70%;">Mortality</button>
+<div class="col">
+    <div class="row">
+        <div class="navbar row-1 my-1 d-flex flex-row justify-content-between" style="height: 50px;">
+            <form method="post" action="{% url 'generate_sales_report' %}">
+                {% csrf_token %}
+                    <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                        Sales Report
+                    </button>
+            </form>
+            <form method="post" action="{% url 'generate_vaxx_report' %}">
+                {% csrf_token %}
+                <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                    Vaccination Report
+                </button>
+            </form>
+            <form method="post" action="{% url 'generate_feed_report' %}">
+                {% csrf_token %}
+                <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                    Feeds Report
+                </button>
+            </form>
+            <form method="post" action="{% url 'generate_weanling_report' %}">
+                {% csrf_token %}
+                <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                    Weanling Report
+                </button>
+            </form>
+            <form method="post" action="{% url 'generate_mortality_report' %}">
+                {% csrf_token %}
+                    <button class="custom_button" type="submit" style="width: 200px; border-radius: 20px;">
+                        Mortality Reports
+                    </button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="d-flex justify-content-around my-2">
+            <button id="showPigSalesButton" class="menu_button mx-2" style="width: 70%;">Pig Sales</button>
+            <button id="showVaccinationButton" class="menu_button mx-2" style="width: 70%;">Vaccination</button>
+            <button id="showFeedsButton" class="menu_button mx-2" style="width: 70%;">Feeds</button>
+            <button id="showWeanlingButton" class="menu_button mx-2" style="width: 70%;">Weanling</button>
+            <button id="showMortalityButton" class="menu_button mx-2" style="width: 70%;">Mortality</button>
+        </div>
+    </div>
 </div>
+
 
 <div id="pigSalesSection">
     <div class="row">
@@ -42,7 +80,7 @@
                     </span>
                 </div>
                 <select class="mt-2 ms-2 rounded" id="selectYear"></select>
-                <canvas id="salesLineChart" width="560" height="250"></canvas>
+                <canvas id="salesLineChart" width="560" height="200"></canvas>
             </div>
         </div>
         <div class="col">
@@ -54,7 +92,7 @@
                     </span>
                 </div>
                 <select class="mt-2 ms-2 rounded" id="selectPigBarYear"></select>
-                <canvas class="ms-2" id="pigBarChart" width="560" height="250"></canvas>
+                <canvas class="ms-2" id="pigBarChart" width="560" height="200"></canvas>
             </div>
         </div>
     </div>
@@ -68,7 +106,7 @@
                     </span>
                 </div>
                 <select class="mt-2 ms-2 rounded" id="selected_year_for_weight"></select>
-                <canvas id="weightBarChart" width="575" height="250"></canvas>
+                <canvas id="weightBarChart" width="575" height="200"></canvas>
             </div>
         </div>        
         <div class="col">
@@ -80,7 +118,7 @@
                     </span>
                 </div>
                 <select class="mt-2 ms-2 rounded" id="selectPigSalesYear"></select>
-                <canvas class="ms-2" id="pigMonthlySalesChart" width="560" height="250"></canvas>
+                <canvas class="ms-2" id="pigMonthlySalesChart" width="560" height="200"></canvas>
             </div>
         </div>
     </div>
@@ -89,7 +127,7 @@
 <div id="vaccinationSection" style="display: none;">
     <div class="row">
         <div class="col d-flex flex-column align-items-center">
-            <canvas id="vaccinationProgress" width="400" height="280"  style="margin:2%;"></canvas>
+            <canvas id="vaccinationProgress" width="400" height="230"  style="margin:2%;"></canvas>
         </div>
         <div class="col">
             <div class="row-1">
@@ -99,7 +137,7 @@
                         <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
                             VACCINATED PER VACCINE</span>
                     </div>
-                    <canvas id="vaccine_counts_chart" width="590" height="280"></canvas>
+                    <canvas id="vaccine_counts_chart" width="590" height="230"></canvas>
                 </div>
             </div>
         </div>
@@ -112,7 +150,7 @@
                     VACCINES NEEDED
                 </span>
             </div>
-            <canvas id="vaccine_needed_bar_chart" width="1100" height="250" class="ms-5" style="margin:2%;"></canvas>
+            <canvas id="vaccine_needed_bar_chart" width="1100" height="200" class="ms-5" style="margin:2%;"></canvas>
         </div>
     </div>
 </div>
@@ -138,9 +176,9 @@
             <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;background-color:#BC4749;">
                 <div class="mt-2 mx-2">
                     <p class="text-white">Total Suckling Count: {{ pig_list_28_days}}</p>
-                    <p class="text-white">Total Feed Needed: {{total_feed_suckling_formatted}} kilos</p>
-                    <p class="text-white">Total Feed Available: {{ difference_booster }} kilos</p>
-                    <p class="text-white">Feeds Deficit: {{ total_feed_suckling_deficit_formatted }} kilos which cost  ₱{{ total_feed_suckling_cost_formatted }}</p>
+                    <p class="text-white my-0 py-0">Total Feed Needed: {{total_feed_suckling_formatted}} kilos</p>
+                    <p class="text-white my-0 py-0">Total Feed Available: {{ difference_booster }} kilos</p>
+                    <p class="text-white my-0 py-0">Feeds Deficit: {{ total_feed_suckling_deficit_formatted }} kilos which cost  ₱{{ total_feed_suckling_cost_formatted }}</p>
                 </div>
             </div>
         </div>
@@ -148,9 +186,9 @@
             <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll; background-color:#F75555;">
                 <div class="mt-2 mx-2">
                     <p class="text-white">Total Weanling Count: {{ pig_list_28_to_88_days}}</p>
-                    <p class="text-white">Total Feed Needed: {{ total_feed_weanling_formatted }} kilos</p>
-                    <p class="text-white">Total Feed Available: {{difference_pre_starter }} kilos</p>
-                    <p class="text-white">Feeds Deficit: {{total_feed_weanling_deficit_formatted }} kilos which cost  ₱{{ total_feed_weanling_cost_formatted}}</p>
+                    <p class="text-white my-0 py-0">Total Feed Needed: {{ total_feed_weanling_formatted }} kilos</p>
+                    <p class="text-white my-0 py-0">Total Feed Available: {{difference_pre_starter }} kilos</p>
+                    <p class="text-white my-0 py-0">Feeds Deficit: {{total_feed_weanling_deficit_formatted }} kilos which cost  ₱{{ total_feed_weanling_cost_formatted}}</p>
                 </div>
             </div>
         </div>
@@ -158,10 +196,10 @@
             <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll; background-color:#F8B9B9;">
                 <div class="mt-2 mx-2">
                     <p class="text-white">Total Grower Count: {{ pig_list_88_to_148_days}}</p>
-                    <p class="text-white">Total Feed Needed: {{ total_feed_grower_formatted }} kilos</p>
-                    <p class="text-white">Total Feed Available: {{ difference_starter }} kilos</p>
-                    <p class="text-white">Feeds Deficit: {{ total_feed_grower_deficit_formatted }} kilos which cost  ₱{{ total_feed_grower_cost_formatted}}</p>
-                    <p class="text-white">Total Feed Cost: {{ total_feed_grower_deficit_formatted }}</p>
+                    <p class="text-white my-0 py-0">Total Feed Needed: {{ total_feed_grower_formatted }} kilos</p>
+                    <p class="text-white my-0 py-0">Total Feed Available: {{ difference_starter }} kilos</p>
+                    <p class="text-white my-0 py-0">Feeds Deficit: {{ total_feed_grower_deficit_formatted }} kilos which cost  ₱{{ total_feed_grower_cost_formatted}}</p>
+                    <p class="text-white my-0 py-0">Total Feed Cost: {{ total_feed_grower_deficit_formatted }}</p>
                 </div>
             </div>
         </div>
@@ -169,15 +207,15 @@
             <div class="graph-container rounded" style="height: 80%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll; background-color:#9c7575;">
                 <div class="mt-2 mx-2">
                     <p class="text-white">Total Pig Count: {{pig_list_greater_than_148_days }}</p>
-                    <p class="text-white">Total Fattener Needed: {{ total_feed_fattener_formatted}} kilos</p>
-                    <p class="text-white">Total Feed Available: {{ difference_grower }} kilos</p>
-                    <p class="text-white">Feeds Deficit: {{ total_feed_fattener_deficit_formatted }} kilos which cost  ₱{{total_feed_fattener_cost_formatted}}</p>
+                    <p class="text-white my-0 py-0">Total Fattener Needed: {{ total_feed_fattener_formatted}} kilos</p>
+                    <p class="text-white my-0 py-0">Total Feed Available: {{ difference_grower }} kilos</p>
+                    <p class="text-white my-0 py-0">Feeds Deficit: {{ total_feed_fattener_deficit_formatted }} kilos which cost  ₱{{total_feed_fattener_cost_formatted}}</p>
                 </div>
             </div>
         </div>
     </div>
     <div class="row-1">
-        <div class="graph-container rounded" style="height: 33%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); transform: translateY(-12%);">
+        <div class="graph-container rounded" style="height: 33%; width: 100%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);">
             <div class="rounded-top" style="background-color: #ff7b7b; width: 100%;">
                 <img src="{% static 'img/pig_logo.png' %}" class="ms-2" style="width: 3%;">
                 <span class="mx-3 pt-2 fs-5 text-white fw-bold" style="width:100px;">
@@ -204,7 +242,7 @@
             </div>
         </div>
         <div class="row-1">
-            <div class="graph-container rounded" style="height: 65%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
+            <div class="graph-container rounded" style="height: 50%; width: 100%; margin-top: 2%; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2); overflow: scroll;">
                 <div class="rounded-top" style="background-color: #ff7b7b;">
                     <img src="{% static 'img/mortality_icon.png' %}" class="ms-2" style="width: 3%;">
                     <span class="mx-3 fs-5 text-white fw-bold">
@@ -241,38 +279,6 @@
                 <canvas id="weanlingsProgressBar" width="400" height="100" style="margin: 2%;"></canvas>
                 <p class="m-2">Prescription: {{ weanlings_prescription }}</p>
             </div>
-        </div>
-        <div class="row-1 d-flex flex-row gap-2 justify-content-between" style="width: 300%; transform: translateY(1000%);">
-            <form method="post" action="{% url 'generate_sales_report' %}">
-                {% csrf_token %}
-                    <button class="menu_button" type="submit">
-                        GENERATE SALES REPORTS
-                    </button>
-            </form>
-            <form method="post" action="{% url 'generate_mortality_report' %}">
-                {% csrf_token %}
-                    <button class="menu_button" type="submit">
-                        GENERATE MORTALITY REPORTS
-                    </button>
-            </form>
-            <form method="post" action="{% url 'generate_weanling_report' %}">
-                {% csrf_token %}
-                    <button class="menu_button" type="submit">
-                        GENERATE WEANLING REPORTS
-                    </button>
-            </form>
-            <form method="post" action="{% url 'generate_vaxx_report' %}">
-                {% csrf_token %}
-                    <button class="menu_button" type="submit">
-                        GENERATE VACCINATION REPORTS
-                    </button>
-            </form>
-            <form method="post" action="{% url 'generate_feed_report' %}">
-                {% csrf_token %}
-                    <button class="menu_button" type="submit">
-                        GENERATE FEEDS REPORTS
-                    </button>
-            </form>
         </div>
     </div>
 </div>

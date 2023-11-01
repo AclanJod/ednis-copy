@@ -711,7 +711,9 @@ $('#search-sow-input').on('input', function () {
                                                         backgroundColor: ['#FDE387', '#659D60', '#FF7373', '#127BBE'],
                                                     }]
                                                 },
-
+                                                options: {
+                                                    responsive: false,
+                                                },
                                             });
 
                                             // Create the line chart
@@ -740,6 +742,9 @@ $('#search-sow-input').on('input', function () {
                                             var lineChart = new Chart(lineChartCanvas, {
                                                 type: 'line',
                                                 data: lineChartData,
+                                                options: {
+                                                    responsive: false,
+                                                },
                                             });
 
                                         } else {
@@ -1949,6 +1954,9 @@ document.addEventListener("DOMContentLoaded", function () {
                                         data: [combinedData.alive, combinedData.mk, combinedData.sb, combinedData.mffd],
                                         backgroundColor: ['#FDE387', '#659D60', '#FF7373', '#127BBE'],
                                     }]
+                                },
+                                options: {
+                                    responsive: false,
                                 },
                             });
 
